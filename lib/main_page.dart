@@ -6,6 +6,7 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_page.dart';
 import 'features/todo/presentation/todo_page.dart';
+import 'seetings_page.dart';
 
 class MainPage extends StatefulWidget {
   final TodoRepo todoRepo;
@@ -31,6 +32,7 @@ class _MainPageState extends State<MainPage> {
         todoRepo: widget.todoRepo,
       ),
       const PomodoroPage(),
+      const SetingsPage(),
     ];
   }
 
@@ -51,6 +53,15 @@ class _MainPageState extends State<MainPage> {
           size: 20,
         ),
         title: 'Pomodoro',
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const FaIcon(
+          FontAwesomeIcons.gear,
+          size: 20,
+        ),
+        title: 'Settings',
         activeColorPrimary: Theme.of(context).colorScheme.primary,
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),

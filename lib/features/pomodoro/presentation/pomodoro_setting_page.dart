@@ -5,89 +5,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../common_widget/app_bar_widget.dart';
 import '../../../common_widget/button_widget.dart';
 import '../../../common_widget/list_tile_widget.dart';
+import '../../../constants/session_list.dart';
+import '../../../constants/time_list.dart';
 import 'pomodor_config_state.dart';
 import 'pomodoro_cubit.dart';
 
-class SettingPage extends StatefulWidget {
-  const SettingPage({super.key});
+class PomodoroSettingPage extends StatefulWidget {
+  const PomodoroSettingPage({super.key});
 
   @override
-  State<SettingPage> createState() => _SettingPageState();
+  State<PomodoroSettingPage> createState() => _PomodoroSettingPageState();
 }
 
-class _SettingPageState extends State<SettingPage> {
-  final timeList = [
-    1,
-    5,
-    10,
-    15,
-    20,
-    25,
-    30,
-    35,
-    40,
-    45,
-    50,
-    55,
-    60,
-    65,
-    70,
-    75,
-    80,
-    85,
-    90,
-    95,
-    100,
-    105,
-    110,
-    115,
-    120,
-    125,
-    130,
-    135,
-    140,
-    145,
-    150,
-    155,
-    160,
-    165,
-    170,
-    175,
-    180,
-    185,
-    190,
-    195,
-    200,
-    205,
-    210,
-    215,
-    220,
-    225,
-    230,
-    235,
-    240,
-    245,
-    250,
-    255,
-    260,
-    265,
-    270,
-    275,
-    280,
-    285,
-    290,
-    295,
-    300,
-  ];
-
-  final sessionList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-
+class _PomodoroSettingPageState extends State<PomodoroSettingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppBarWidget(
         title: 'Duration',
-        isAction: true,
+        isAction: false,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -155,23 +91,48 @@ class _SettingPageState extends State<SettingPage> {
                 child: CupertinoPicker(
                     itemExtent: timeList.length.toDouble(),
                     onSelectedItemChanged: (int index) {
-                      if (type == 'Focus Session') {
-                        pomodoroCubit.workDurationChanged(
-                          timeList[index],
-                        );
-                      } else if (type == 'Short Break') {
-                        pomodoroCubit.shortBreakDurationChanged(
-                          timeList[index],
-                        );
-                      } else if (type == 'Long Break') {
-                        pomodoroCubit.longBreakDurationChanged(
-                          timeList[index],
-                        );
-                      } else if (type == 'Long Break After') {
-                        pomodoroCubit.setSessionCount(
-                          sessionList[index],
-                        );
+                      switch (type) {
+                        case 'Focus Session':
+                          pomodoroCubit.workDurationChanged(
+                            timeList[index],
+                          );
+                          break;
+                        case 'Short Break':
+                          pomodoroCubit.shortBreakDurationChanged(
+                            timeList[index],
+                          );
+                          break;
+                        case 'Long Break':
+                          pomodoroCubit.longBreakDurationChanged(
+                            timeList[index],
+                          );
+                          break;
+                        case 'Long Break After':
+                          pomodoroCubit.setSessionCount(
+                            sessionList[index],
+                          );
+                          break;
+                        default:
+                          // Handle unknown type if necessary
+                          break;
                       }
+                      // if (type == 'Focus Session') {
+                      //   pomodoroCubit.workDurationChanged(
+                      //     timeList[index],
+                      //   );
+                      // } else if (type == 'Short Break') {
+                      //   pomodoroCubit.shortBreakDurationChanged(
+                      //     timeList[index],
+                      //   );
+                      // } else if (type == 'Long Break') {
+                      //   pomodoroCubit.longBreakDurationChanged(
+                      //     timeList[index],
+                      //   );
+                      // } else if (type == 'Long Break After') {
+                      //   pomodoroCubit.setSessionCount(
+                      //     sessionList[index],
+                      //   );
+                      // }
                     },
                     children: type == 'Long Break After'
                         ? List.generate(sessionList.length, (index) {

@@ -34,7 +34,7 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
         );
 
   void workDurationChanged(int workDuration) {
-    emit(state.copyWith(workDuration: workDuration * 2));
+    emit(state.copyWith(workDuration: workDuration * 60));
   }
 
   void shortBreakDurationChanged(int shortBreakDuration) {

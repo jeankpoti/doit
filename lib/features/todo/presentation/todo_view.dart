@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../common_widget/app_bar_widget.dart';
 import '../domain/models/todo.dart';
-import '../../../theme/theme_cubit.dart';
 import 'todo_cubit.dart';
 
 class TodoView extends StatelessWidget {
@@ -51,7 +50,7 @@ class TodoView extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: const AppBarWidget(
         title: 'Todo List',
-        isAction: true,
+        isAction: false,
       ),
       body: BlocBuilder<TodoCubit, List<Todo>>(
         builder: (context, todos) {

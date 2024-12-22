@@ -1,6 +1,5 @@
-import 'package:do_it/theme/theme_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import '../features/pomodoro/presentation/pomodoro_setting_page.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final bool? isAction;
@@ -19,11 +18,20 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       actions: isAction == true
           ? [
               IconButton(
-                icon: const Icon(Icons.brightness_4),
-                onPressed: () {
-                  context.read<ThemeCubit>().toggleTheme();
-                },
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PomodoroSettingPage(),
+                  ),
+                ),
+                icon: const Icon(Icons.settings),
               ),
+              // IconButton(
+              //   icon: const Icon(Icons.brightness_4),
+              //   onPressed: () {
+              //     context.read<ThemeCubit>().toggleTheme();
+              //   },
+              // ),
             ]
           : [],
     );

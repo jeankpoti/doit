@@ -5,7 +5,7 @@ import '../../../common_widget/app_bar_widget.dart';
 import '../../../common_widget/elevated_button_icon_widget.dart';
 import 'pomodor_config_state.dart';
 import 'pomodoro_cubit.dart';
-import 'setting_page.dart';
+import 'pomodoro_setting_page.dart';
 
 class PomodoroPage extends StatefulWidget {
   const PomodoroPage({super.key});
@@ -32,145 +32,148 @@ class _PomodoroPageState extends State<PomodoroPage> {
         title: 'Pomodoro Timer',
         isAction: true,
       ),
-      body: BlocBuilder<PomodoroCubit, PomodoroConfigState>(
-          builder: (context, state) {
-        print('state.sessionCount: ${state.sessionCount}');
-        return Column(
-          spacing: 30,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _TimerDisplay(),
-            if (state.isRunning)
-              ElevatedButtonIconWidget(
-                text: 'Pause',
-                icon: const Icon(Icons.pause, size: 40),
-                onPressed: () => context.read<PomodoroCubit>().pauseTimer(),
-              )
-            else if (!state.isRunning &&
-                state.remainingTime > 0 &&
-                started == true)
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 20,
-                children: [
-                  if (!state.isRunning &&
-                      started == true &&
-                      state.completedSessions < state.sessionCount &&
-                      state.completedSessions >= 0 &&
-                      state.isBreak)
-                    ElevatedButtonIconWidget(
-                      text: 'Resume',
-                      icon: const Icon(Icons.play_arrow, size: 40),
-                      onPressed: () =>
-                          context.read<PomodoroCubit>().resumeBreakTimer(),
-                    )
-                  else if (!state.isRunning &&
-                      started == true &&
-                      state.completedSessions >= state.sessionCount &&
-                      state.isBreak)
-                    ElevatedButtonIconWidget(
-                      text: 'Resume',
-                      icon: const Icon(Icons.play_arrow, size: 40),
-                      onPressed: () =>
-                          context.read<PomodoroCubit>().resumeBreakTimer(),
-                    )
-                  else
-                    ElevatedButtonIconWidget(
-                      text: 'Resume',
-                      icon: const Icon(Icons.play_arrow, size: 40),
-                      onPressed: () =>
-                          context.read<PomodoroCubit>().resumeTimer(),
-                    ),
-                  if (!state.isRunning &&
-                      state.remainingTime == 0 &&
-                      started == true &&
-                      state.completedSessions < state.sessionCount &&
-                      state.completedSessions >= 0 &&
-                      state.isBreak)
-                    ElevatedButtonIconWidget(
-                      text: 'Start short break',
-                      icon: const Icon(Icons.play_arrow, size: 40),
-                      onPressed: () =>
-                          context.read<PomodoroCubit>().stopTimer('shortBreak'),
-                    )
-                  else if (!state.isRunning &&
-                      state.remainingTime == 0 &&
-                      started == true &&
-                      state.completedSessions >= state.sessionCount &&
-                      state.isBreak)
-                    ElevatedButtonIconWidget(
-                      text: 'Start long break',
-                      icon: const Icon(Icons.play_arrow, size: 40),
-                      onPressed: () =>
-                          context.read<PomodoroCubit>().stopTimer('longBreak'),
-                    )
-                  else
-                    ElevatedButtonIconWidget(
-                      text: 'Stop',
-                      icon: const Icon(Icons.stop, size: 40),
-                      onPressed: () =>
-                          context.read<PomodoroCubit>().stopTimer('work'),
-                    )
-                ],
-              )
-            else if (!state.isRunning &&
-                state.remainingTime == 0 &&
-                started == true &&
-                state.completedSessions < state.sessionCount &&
-                state.completedSessions >= 1 &&
-                state.isBreak)
-              ElevatedButtonIconWidget(
-                text: 'Start short break',
-                icon: const Icon(Icons.play_arrow, size: 40),
-                onPressed: () => {
-                  setState(() {
-                    started = true;
-                  }),
-                  context
-                      .read<PomodoroCubit>()
-                      .startBreak(state.shortBreakDuration)
-                },
-              )
-            else if (!state.isRunning &&
-                state.remainingTime == 0 &&
-                started == true &&
-                state.completedSessions >= state.sessionCount &&
-                state.isBreak)
-              ElevatedButtonIconWidget(
-                text: 'Start long break',
-                icon: const Icon(Icons.play_arrow, size: 40),
-                onPressed: () => {
-                  setState(() {
-                    started = true;
-                  }),
-                  context
-                      .read<PomodoroCubit>()
-                      .startBreak(state.longBreakDuration)
-                },
-              )
-            else
-              ElevatedButtonIconWidget(
-                text: 'Start',
-                icon: const Icon(Icons.play_arrow, size: 40),
-                onPressed: () => {
-                  setState(() {
-                    started = true;
-                  }),
-                  context.read<PomodoroCubit>().startTimer(state.workDuration)
-                },
-              ),
-            IconButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingPage(),
+      body: SafeArea(
+        child: BlocBuilder<PomodoroCubit, PomodoroConfigState>(
+            builder: (context, state) {
+          return Column(
+            spacing: 30,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _TimerDisplay(),
+              if (state.isRunning)
+                ElevatedButtonIconWidget(
+                  text: 'Pause',
+                  icon: const Icon(Icons.pause, size: 40),
+                  onPressed: () => context.read<PomodoroCubit>().pauseTimer(),
+                )
+              else if (!state.isRunning &&
+                  state.remainingTime > 0 &&
+                  started == true)
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 20,
+                  children: [
+                    if (!state.isRunning &&
+                        started == true &&
+                        state.completedSessions < state.sessionCount &&
+                        state.completedSessions >= 0 &&
+                        state.isBreak)
+                      ElevatedButtonIconWidget(
+                        text: 'Resume',
+                        icon: const Icon(Icons.play_arrow, size: 40),
+                        onPressed: () =>
+                            context.read<PomodoroCubit>().resumeBreakTimer(),
+                      )
+                    else if (!state.isRunning &&
+                        started == true &&
+                        state.completedSessions >= state.sessionCount &&
+                        state.isBreak)
+                      ElevatedButtonIconWidget(
+                        text: 'Resume',
+                        icon: const Icon(Icons.play_arrow, size: 40),
+                        onPressed: () =>
+                            context.read<PomodoroCubit>().resumeBreakTimer(),
+                      )
+                    else
+                      ElevatedButtonIconWidget(
+                        text: 'Resume',
+                        icon: const Icon(Icons.play_arrow, size: 40),
+                        onPressed: () =>
+                            context.read<PomodoroCubit>().resumeTimer(),
+                      ),
+                    if (!state.isRunning &&
+                        state.remainingTime == 0 &&
+                        started == true &&
+                        state.completedSessions < state.sessionCount &&
+                        state.completedSessions >= 0 &&
+                        state.isBreak)
+                      ElevatedButtonIconWidget(
+                        text: 'Start short break',
+                        icon: const Icon(Icons.play_arrow, size: 40),
+                        onPressed: () => context
+                            .read<PomodoroCubit>()
+                            .stopTimer('shortBreak'),
+                      )
+                    else if (!state.isRunning &&
+                        state.remainingTime == 0 &&
+                        started == true &&
+                        state.completedSessions >= state.sessionCount &&
+                        state.isBreak)
+                      ElevatedButtonIconWidget(
+                        text: 'Start long break',
+                        icon: const Icon(Icons.play_arrow, size: 40),
+                        onPressed: () => context
+                            .read<PomodoroCubit>()
+                            .stopTimer('longBreak'),
+                      )
+                    else
+                      ElevatedButtonIconWidget(
+                        text: 'Stop',
+                        icon: const Icon(Icons.stop, size: 40),
+                        onPressed: () =>
+                            context.read<PomodoroCubit>().stopTimer('work'),
+                      )
+                  ],
+                )
+              else if (!state.isRunning &&
+                  state.remainingTime == 0 &&
+                  started == true &&
+                  state.completedSessions < state.sessionCount &&
+                  state.completedSessions >= 1 &&
+                  state.isBreak)
+                ElevatedButtonIconWidget(
+                  text: 'Start short break',
+                  icon: const Icon(Icons.play_arrow, size: 40),
+                  onPressed: () => {
+                    setState(() {
+                      started = true;
+                    }),
+                    context
+                        .read<PomodoroCubit>()
+                        .startBreak(state.shortBreakDuration)
+                  },
+                )
+              else if (!state.isRunning &&
+                  state.remainingTime == 0 &&
+                  started == true &&
+                  state.completedSessions >= state.sessionCount &&
+                  state.isBreak)
+                ElevatedButtonIconWidget(
+                  text: 'Start long break',
+                  icon: const Icon(Icons.play_arrow, size: 40),
+                  onPressed: () => {
+                    setState(() {
+                      started = true;
+                    }),
+                    context
+                        .read<PomodoroCubit>()
+                        .startBreak(state.longBreakDuration)
+                  },
+                )
+              else
+                ElevatedButtonIconWidget(
+                  text: 'Start',
+                  icon: const Icon(Icons.play_arrow, size: 40),
+                  onPressed: () => {
+                    setState(() {
+                      started = true;
+                    }),
+                    context.read<PomodoroCubit>().startTimer(state.workDuration)
+                  },
                 ),
-              ),
-              icon: const Icon(Icons.settings),
-            ),
-          ],
-        );
-      }),
+              // IconButton(
+              //   onPressed: () => Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) => const PomodoroSettingPage(),
+              //     ),
+              //   ),
+              //   icon: const Icon(Icons.settings),
+              // ),
+            ],
+          );
+        }),
+      ),
     );
   }
 }
