@@ -30,6 +30,7 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
             remainingTime: 25 * 60,
             isBreak: false,
             isRunning: false,
+            isPaused: false,
           )),
         );
 
@@ -90,9 +91,25 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
     startTimer(breakDuration, isBreak: true);
   }
 
+  void skipBreak() {
+    _timer?.cancel(); // Stop the break timer
+
+    emit(state.copyWith(
+      isBreak: false, // Transition back to a work session
+      isRunning: false, // Timer is paused initially
+      isPaused: false,
+      remainingTime: state.workDuration, // Set time for the next work session
+    ));
+
+    print("Skipped break. State updated:");
+    print(
+      "isBreak: ${state.isBreak}, isRunning: ${state.isRunning}, remainingTime: ${state.remainingTime} isPaused: ${state.isPaused} ",
+    );
+  }
+
   void pauseTimer() {
     _timer?.cancel();
-    emit(state.copyWith(isRunning: false));
+    emit(state.copyWith(isRunning: false, isPaused: true));
   }
 
   void resumeTimer({bool isBreak = false}) {

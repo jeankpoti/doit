@@ -5,6 +5,7 @@ class PomodoroConfigState extends Equatable {
   final int shortBreakDuration;
   final int longBreakDuration;
   final bool isBreak;
+  final bool isPaused;
   final bool isRunning;
   final int completedSessions;
   final int sessionCount;
@@ -16,6 +17,7 @@ class PomodoroConfigState extends Equatable {
     required this.shortBreakDuration,
     required this.longBreakDuration,
     required this.isBreak,
+    required this.isPaused,
     required this.isRunning,
     required this.completedSessions,
     required this.sessionCount,
@@ -28,6 +30,7 @@ class PomodoroConfigState extends Equatable {
     int? shortBreakDuration,
     int? longBreakDuration,
     bool? isBreak,
+    bool? isPaused,
     bool? isRunning,
     int? completedSessions,
     int? sessionCount,
@@ -39,6 +42,7 @@ class PomodoroConfigState extends Equatable {
       shortBreakDuration: shortBreakDuration ?? this.shortBreakDuration,
       longBreakDuration: longBreakDuration ?? this.longBreakDuration,
       isBreak: isBreak ?? this.isBreak,
+      isPaused: isPaused ?? this.isPaused,
       isRunning: isRunning ?? this.isRunning,
       completedSessions: completedSessions ?? this.completedSessions,
       sessionCount: sessionCount ?? this.sessionCount,
@@ -53,6 +57,7 @@ class PomodoroConfigState extends Equatable {
         shortBreakDuration,
         longBreakDuration,
         isBreak,
+        isPaused,
         isRunning,
         completedSessions,
         sessionCount,

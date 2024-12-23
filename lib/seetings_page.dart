@@ -44,62 +44,76 @@ class _SetingsPageState extends State<SetingsPage> {
                   },
                 ),
               ),
-              SettingsListTile(
-                text: 'Configure pomodoro ',
-                icon: Icon(
-                  Icons.sync,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SettingsListTile(
-                text: 'Choose pomodoro sound',
-                icon: Icon(
-                  Icons.sync,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SettingsListTile(
-                text: 'Disable pomodoro sound or vibration',
-                icon: Icon(
-                  Icons.sync,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SettingsListTile(
-                text: 'Change pomodoro sound volume',
-                icon: Icon(
-                  Icons.sync,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SettingsListTile(
-                text: 'Backup and restore data',
-                icon: Icon(
-                  Icons.sync,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SettingsListTile(
-                text: 'Calendar Sync',
-                icon: Icon(
-                  Icons.brightness_4,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SettingsListTile(
-                text: 'Rate us',
-                icon: Icon(
-                  Icons.brightness_4,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SettingsListTile(
-                text: 'About us',
-                icon: Icon(
-                  Icons.brightness_4,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
+              // SettingsListTile(
+              //   text: 'Configure pomodoro ',
+              //   icon: Icon(
+              //     Icons.sync,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Choose pomodoro sound',
+              //   icon: Icon(
+              //     Icons.sync,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Disable pomodoro sound or vibration',
+              //   icon: Icon(
+              //     Icons.sync,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Change pomodoro sound volume',
+              //   icon: Icon(
+              //     Icons.sync,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Backup and restore data',
+              //   icon: Icon(
+              //     Icons.sync,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Calendar Sync',
+              //   icon: Icon(
+              //     Icons.brightness_4,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Rate us',
+              //   icon: Icon(
+              //     Icons.brightness_4,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Share with friends',
+              //   icon: Icon(
+              //     Icons.brightness_4,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'Credits',
+              //   icon: Icon(
+              //     Icons.brightness_4,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
+              // SettingsListTile(
+              //   text: 'About us',
+              //   icon: Icon(
+              //     Icons.brightness_4,
+              //     color: Theme.of(context).colorScheme.primary,
+              //   ),
+              // ),
             ],
           ),
         ),
