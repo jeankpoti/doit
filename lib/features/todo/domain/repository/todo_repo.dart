@@ -4,15 +4,16 @@ TodoRepo is an abstract class that defines the methods that the TodoRepository c
 Here we define what the app can do
 */
 
+import '../../data/models/isar_todo.dart';
 import '../models/todo.dart';
 
 abstract class TodoRepo {
   Future<void> addTodo(Todo todo);
   Future<void> deleteTodo(Todo todo);
-  Future<void> updateTodo(Todo todo);
+  Future<void> updateTodo(TodoIsar todo);
+  Future<void> toggleTodoStatus(Todo todo);
   Future<List<Todo>> getTodos();
 }
-
 
 /*
 

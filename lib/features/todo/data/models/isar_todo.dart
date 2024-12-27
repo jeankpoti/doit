@@ -15,14 +15,16 @@ part 'isar_todo.g.dart';
 @collection
 class TodoIsar {
   Id id = Isar.autoIncrement;
-  late String text;
+  late String title;
+  late String description;
   late bool isCompleted;
 
   // Convert isar object -> pure todo object to use in our app
   Todo toDomain() {
     return Todo(
       id: id,
-      text: text,
+      title: title,
+      description: description,
       isCompleted: isCompleted,
     );
   }
@@ -31,7 +33,8 @@ class TodoIsar {
   static TodoIsar fromDomain(Todo todo) {
     return TodoIsar()
       ..id = todo.id
-      ..text = todo.text
+      ..title = todo.title
+      ..description = todo.description ?? ''
       ..isCompleted = todo.isCompleted;
   }
 }

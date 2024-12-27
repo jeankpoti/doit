@@ -1,11 +1,13 @@
 class Todo {
   final int id;
-  final String text;
+  final String title;
+  final String? description;
   final bool isCompleted;
 
   Todo({
     required this.id,
-    required this.text,
+    required this.title,
+    this.description,
     this.isCompleted = false,
   });
 
@@ -13,7 +15,8 @@ class Todo {
   Todo toggleCompletion() {
     return Todo(
       id: id,
-      text: text,
+      title: title,
+      description: description,
       isCompleted: !isCompleted,
     );
   }

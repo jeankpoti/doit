@@ -6,6 +6,7 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../data/models/isar_todo.dart';
 import '../domain/models/todo.dart';
 import '../domain/repository/todo_repo.dart';
 
@@ -29,10 +30,11 @@ class TodoCubit extends Cubit<List<Todo>> {
   }
 
   // Add a new todo
-  Future<void> addTodo(String text) async {
+  Future<void> addTodo(String title, description) async {
     final newTodo = Todo(
       id: DateTime.now().millisecondsSinceEpoch,
-      text: text,
+      title: title,
+      description: description,
     );
 
     // Add the todo to the repo
@@ -43,13 +45,13 @@ class TodoCubit extends Cubit<List<Todo>> {
   }
 
   // Update a todo
-  // Future<void> updateTodo(Todo todo) async {
-  //   // Update the todo in the repo
-  //   await todoRepo.updateTodo(todo);
+  Future<void> updateTodo(TodoIsar todo) async {
+    // Update the todo in the repo
+    await todoRepo.updateTodo(todo);
 
-  //   // Re-load todos
-  //   loadTodos();
-  // }
+    // Re-load todos
+    loadTodos();
+  }
 
   // Delete a todo
   Future<void> deleteTodo(Todo todo) async {
@@ -66,7 +68,7 @@ class TodoCubit extends Cubit<List<Todo>> {
     final updatedTodo = todo.toggleCompletion();
 
     // Update the todo in the repo
-    await todoRepo.updateTodo(updatedTodo);
+    await todoRepo.toggleTodoStatus(updatedTodo);
 
     // Re-load todos
     loadTodos();

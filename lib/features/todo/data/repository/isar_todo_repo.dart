@@ -38,13 +38,52 @@ class IsarTodoRepo implements TodoRepo {
   }
 
 // Update a todo in the isar database
+  // @override
+  // Future<void> updateTodo(Todo todo) {
+  //   print('Updating todo: ${todo.id}');
+  //   // Convert todo into isar todo
+  //   final todoIsar = TodoIsar.fromDomain(todo);
+
+  //   // Update the todo in the isar database
+  //   return db.writeTxn(() => db.todoIsars.put(todoIsar));
+  // }
   @override
-  Future<void> updateTodo(Todo todo) {
-    // Convert todo into isar todo
+  Future<void> toggleTodoStatus(Todo todo) async {
+    // Convert to Isar model
     final todoIsar = TodoIsar.fromDomain(todo);
 
-    // Update the todo in the isar database
-    return db.writeTxn(() => db.todoIsars.put(todoIsar));
+    // Check if the record exists
+    final existingTodo = await db.todoIsars.get(todo.id);
+    if (existingTodo == null) {
+      return;
+    }
+
+    try {
+      // Update the todo in Isar database
+      await db.writeTxn(() async {
+        await db.todoIsars.put(todoIsar);
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateTodo(TodoIsar todo) async {
+    // Check if the record exists
+    final existingTodo = await db.todoIsars.get(todo.id);
+    if (existingTodo == null) {
+      return;
+    }
+
+    try {
+      // Update the todo in Isar database
+      await db.writeTxn(() async {
+        await db.todoIsars.put(todo); // insert & update
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
 // Delete a todo from the isar database
