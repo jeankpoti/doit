@@ -27,6 +27,13 @@ class IsarTodoRepo implements TodoRepo {
     return todos.map((todoIsar) => todoIsar.toDomain()).toList();
   }
 
+  @override
+  Future<List<Todo>> getCompletedTodos() async {
+    final completedTodos =
+        await db.todoIsars.filter().isCompletedEqualTo(true).findAll();
+    return completedTodos.map((todoIsar) => todoIsar.toDomain()).toList();
+  }
+
   // Add a todo to the isar database
   @override
   Future<void> addTodo(Todo newTodo) {
@@ -37,16 +44,6 @@ class IsarTodoRepo implements TodoRepo {
     return db.writeTxn(() => db.todoIsars.put(todoIsar));
   }
 
-// Update a todo in the isar database
-  // @override
-  // Future<void> updateTodo(Todo todo) {
-  //   print('Updating todo: ${todo.id}');
-  //   // Convert todo into isar todo
-  //   final todoIsar = TodoIsar.fromDomain(todo);
-
-  //   // Update the todo in the isar database
-  //   return db.writeTxn(() => db.todoIsars.put(todoIsar));
-  // }
   @override
   Future<void> toggleTodoStatus(Todo todo) async {
     // Convert to Isar model

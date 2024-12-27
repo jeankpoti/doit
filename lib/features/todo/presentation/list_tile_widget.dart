@@ -3,7 +3,6 @@ import 'package:do_it/features/todo/presentation/todo_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 import '../../../common_widget/button_widget.dart';
 import '../../../common_widget/icon_widget.dart';
@@ -124,16 +123,10 @@ class _ListTileWidgetState extends State<ListTileWidget>
   }
 
   void handleClick(String value, Todo todo) {
-    print('tdo.id ${todo.id}');
     switch (value) {
       case 'Edit':
         _showBottomSheet(context, todo);
-        // PersistentNavBarNavigator.pushNewScreen(
-        //   context,
-        //   screen: UpdateTodoView(todo: todo),
-        //   withNavBar: false,
-        //   pageTransitionAnimation: PageTransitionAnimation.cupertino,
-        // );
+
         break;
       case 'Delete':
         showMyDialog(todo);
@@ -144,24 +137,15 @@ class _ListTileWidgetState extends State<ListTileWidget>
   void validateAndUpdate(buildContext, todo) async {
     final FormState form = _formKey.currentState!;
     if (form.validate()) {
-      print('  ..todo.id  ${todo.title}');
-
       final todoToUpdate = TodoIsar()
         ..id = todo.id
         ..title = _titleController.text
         ..description = _descriptionController.text
         ..isCompleted = todo.isCompleted;
-      // final todoId = todo.id;
-      // todo
-      //   ..id = todoId
-      //   ..title = _titleController.text
-      //   ..description = _descriptionController.text;
+
       final todoCubit = context.read<TodoCubit>();
 
       todoCubit.updateTodo(todoToUpdate);
-      // await isar!.writeTxn(() async {
-      //   await isar!.todoIsars.put(todoToUpdate); // insert & update
-      // });
 
       _titleController.clear();
       _descriptionController.clear();
@@ -193,50 +177,47 @@ class _ListTileWidgetState extends State<ListTileWidget>
               ),
             ],
           ),
-          child: ListTile(
-            title: TextWidget(text: widget.todoList.title),
-            subtitle: TextWidget(text: widget.todoList.description ?? ''),
-            leading: Checkbox(
-                value: widget.todoList.isCompleted,
-                onChanged: (value) =>
-                    todoCubit.toggleTodoStatus(widget.todoList)),
-            trailing: widget.isCompleted
-                ? const SizedBox.shrink()
-                : SizedBox(
-                    width: 50,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        widget.isTrailingVisible
-                            ? PopupMenuButton<String>(
-                                icon: const IconWidget(icon: Icons.more_vert),
-                                onSelected: (String value) {
-                                  handleClick(value, widget.todoList);
-                                },
-                                itemBuilder: (BuildContext context) {
-                                  return choices.map((choice) {
-                                    return PopupMenuItem<String>(
-                                      value: choice['title'].toString(),
-                                      child: ListTile(
-                                        leading: choice['icon'],
-                                        title: Text(choice['title'].toString()),
-                                      ),
-                                    );
-                                  }).toList();
-                                },
-                              )
-                            : const SizedBox.shrink(),
-                      ],
-                    ),
-                  ),
-
-            //  IconButton(
-            //   icon: const Icon(Icons.delete),
-            //   onPressed: () {
-            //     todoCubit.deleteTodo(widget.todoList);
-            //   },
-            // ),
-          ),
+          child: widget.todoList.isCompleted
+              ? const SizedBox.shrink()
+              : ListTile(
+                  title: TextWidget(text: widget.todoList.title),
+                  subtitle: TextWidget(text: widget.todoList.description ?? ''),
+                  leading: Checkbox(
+                      value: widget.todoList.isCompleted,
+                      onChanged: (value) =>
+                          todoCubit.toggleTodoStatus(widget.todoList)),
+                  trailing: widget.isCompleted
+                      ? const SizedBox.shrink()
+                      : SizedBox(
+                          width: 50,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              widget.isTrailingVisible
+                                  ? PopupMenuButton<String>(
+                                      icon: const IconWidget(
+                                          icon: Icons.more_vert),
+                                      onSelected: (String value) {
+                                        handleClick(value, widget.todoList);
+                                      },
+                                      itemBuilder: (BuildContext context) {
+                                        return choices.map((choice) {
+                                          return PopupMenuItem<String>(
+                                            value: choice['title'].toString(),
+                                            child: ListTile(
+                                              leading: choice['icon'],
+                                              title: Text(
+                                                  choice['title'].toString()),
+                                            ),
+                                          );
+                                        }).toList();
+                                      },
+                                    )
+                                  : const SizedBox.shrink(),
+                            ],
+                          ),
+                        ),
+                ),
         ),
       ),
     );

@@ -29,6 +29,17 @@ class TodoCubit extends Cubit<List<Todo>> {
     emit(todos);
   }
 
+  // Load todos from the repo
+  Future<void> loadCompletedTodos() async {
+    // Get todos from the repo
+    final completedTodos = await todoRepo.getCompletedTodos();
+
+    print('completedTodos: $completedTodos');
+
+    // Emit the fecthed todos as the new state
+    emit(completedTodos);
+  }
+
   // Add a new todo
   Future<void> addTodo(String title, description) async {
     final newTodo = Todo(

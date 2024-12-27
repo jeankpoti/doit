@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'common_widget/app_bar_widget.dart';
+import 'features/todo/presentation/completed_todo_page.dart';
 
 class SetingsPage extends StatefulWidget {
   const SetingsPage({super.key});
@@ -42,6 +43,19 @@ class _SetingsPageState extends State<SetingsPage> {
                       context.read<ThemeCubit>().toggleTheme();
                     });
                   },
+                ),
+              ),
+              SettingsListTile(
+                text: 'Historics',
+                icon: Icon(
+                  Icons.history,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CompletedTodoPage(),
+                  ),
                 ),
               ),
               // SettingsListTile(

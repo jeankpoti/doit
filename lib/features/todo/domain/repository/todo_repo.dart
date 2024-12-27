@@ -13,6 +13,7 @@ abstract class TodoRepo {
   Future<void> updateTodo(TodoIsar todo);
   Future<void> toggleTodoStatus(Todo todo);
   Future<List<Todo>> getTodos();
+  Future<List<Todo>> getCompletedTodos();
 }
 
 /*

@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 class SettingsListTile extends StatelessWidget {
   final String text;
   final Widget icon;
-
   final Switch? switcher;
+  final void Function()? onTap;
 
   const SettingsListTile({
     super.key,
     required this.text,
     required this.icon,
     this.switcher,
+    this.onTap,
   });
 
   @override
@@ -32,6 +33,7 @@ class SettingsListTile extends StatelessWidget {
               ),
         ),
         trailing: switcher,
+        onTap: onTap,
       ),
     );
   }

@@ -1,0 +1,75 @@
+import 'package:do_it/common_widget/app_bar_widget.dart';
+import 'package:do_it/features/todo/presentation/todo_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../domain/models/todo.dart';
+import 'list_tile_widget.dart';
+
+class CompletedTodoPage extends StatefulWidget {
+  const CompletedTodoPage({super.key});
+
+  @override
+  State<CompletedTodoPage> createState() => _CompletedTodoPageState();
+}
+
+class _CompletedTodoPageState extends State<CompletedTodoPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<TodoCubit>().loadCompletedTodos();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const AppBarWidget(
+        title: 'Completed Todos',
+      ),
+      body: BlocBuilder<TodoCubit, List<Todo>>(
+        builder: (context, todos) {
+          return ListView.builder(
+              itemCount: todos.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 4.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    // border: Border.all(),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        offset: Offset(0, 2),
+                        blurRadius: 6.0,
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    title: Text(todos[index].title),
+                    subtitle: Text(todos[index].description ?? ''),
+                  ),
+                );
+              });
+
+          // ListView.builder(
+          //   itemCount: todos.length,
+          //   itemBuilder: (context, index) {
+          //     final todo = todos[index];
+          //     print('todo: ${todo.title}');
+          //     return ListTileWidget(
+          //       todoList: todo,
+          //       title: todo.title,
+          //       desc: 'todo.description',
+          //     );
+          //   },
+          // );
+        },
+      ),
+    );
+  }
+}

@@ -6,7 +6,7 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_page.dart';
 import 'features/todo/presentation/todo_page.dart';
-import 'setings_page.dart';
+import 'settings_page.dart';
 
 class MainPage extends StatefulWidget {
   final TodoRepo todoRepo;
