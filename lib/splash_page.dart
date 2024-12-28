@@ -76,29 +76,29 @@ class _SplashPageState extends State<SplashPage>
     if (!mounted) return;
 
     // Check onboarding status
-    final prefs = await SharedPreferences.getInstance();
-    final isFirstTime = prefs.getBool('isFirstTime') ?? true;
+    // final prefs = await SharedPreferences.getInstance();
+    // final isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
     if (!mounted) return;
 
     // Fade out animation before navigation
     await _controller.reverse();
 
-    if (isFirstTime && mounted) {
+    // if (isFirstTime && mounted) {
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const OnBoardingPage()),
+    //   );
+    // } else {
+    if (mounted) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const OnBoardingPage()),
+        MaterialPageRoute(
+          builder: (context) => MainPage(todoRepo: widget.todoRepo),
+        ),
       );
-    } else {
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MainPage(todoRepo: widget.todoRepo),
-          ),
-        );
-      }
     }
+    // }
   }
 
   @override
@@ -130,16 +130,19 @@ class _SplashPageState extends State<SplashPage>
                             BoxShadow(
                               color: Theme.of(context)
                                   .colorScheme
-                                  .primary
-                                  .withOpacity(0.3),
+                                  .surface
+                                  .withValues(),
                               blurRadius: 20,
                               spreadRadius: 5,
                             ),
                           ],
                         ),
                         child: Text(
-                          'Doit',
-                          style: Theme.of(context).textTheme.displayLarge,
+                          'Work Snap',
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium!
+                              .copyWith(fontWeight: FontWeight.bold),
                         )
 
                         //  Image.asset(

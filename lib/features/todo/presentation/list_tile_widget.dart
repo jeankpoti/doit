@@ -1,5 +1,3 @@
-import 'package:do_it/common_widget/text_widget.dart';
-import 'package:do_it/features/todo/presentation/todo_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
@@ -7,20 +5,10 @@ import 'package:isar/isar.dart';
 import '../../../common_widget/button_widget.dart';
 import '../../../common_widget/icon_widget.dart';
 import '../../../common_widget/text_form_field_widget.dart';
-import '../data/models/isar_todo.dart';
-import '../domain/models/todo.dart';
-
-import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
-
-import '../../../common_widget/icon_widget.dart';
 import '../../../common_widget/text_widget.dart';
-import '../../../common_widget/button_widget.dart';
-import '../../../common_widget/text_form_field_widget.dart';
 import '../data/models/isar_todo.dart';
 import '../domain/models/todo.dart';
 import 'todo_cubit.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ListTileWidget extends StatefulWidget {
   final String? title, desc;
@@ -28,17 +16,9 @@ class ListTileWidget extends StatefulWidget {
   final bool isTrailingVisible;
   bool isChecked = false;
   bool isCompleted = false;
-
-  // ------------------- ADDED FIELDS FOR MULTI-SELECTION ---------------------
-  /// Whether the app is currently in multi-selection mode.
   final bool isSelectionMode;
-
-  /// Whether this specific todo is selected in multi-selection mode.
   final bool isSelected;
-
-  /// Callback when user toggles selection of this todo in multi-selection mode.
   final ValueChanged<bool?>? onSelected;
-  // --------------------------------------------------------------------------
 
   ListTileWidget({
     super.key,
@@ -48,12 +28,9 @@ class ListTileWidget extends StatefulWidget {
     this.isTrailingVisible = true,
     this.isChecked = false,
     this.isCompleted = false,
-
-    // ------------------- DEFAULT VALUES FOR NEW FIELDS ----------------------
     this.isSelectionMode = false,
     this.isSelected = false,
     this.onSelected,
-    // ------------------------------------------------------------------------
   });
 
   @override

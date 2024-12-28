@@ -28,14 +28,6 @@ void main() async {
 
   final pomodoroRepo = IsarPomodoroRepo();
 
-  Color surfaceColor = Colors.amber.shade500;
-  Color primaryColor = Colors.amber.shade400;
-  Color secondaryColor = Colors.amber.shade300;
-
-  print('Surface Color: ${surfaceColor.value.toRadixString(16)}');
-  print('Primary Color: ${primaryColor.value.toRadixString(16)}');
-  print('Secondary Color: ${secondaryColor.value.toRadixString(16)}');
-
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<TodoCubit>(
@@ -67,7 +59,7 @@ class MyApp extends StatelessWidget {
       builder: (context, currentTheme) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Do It',
+          title: 'Work Snap',
           theme: currentTheme,
           home: SplashPage(todoRepo: todoRepo),
           // TodoPage(todoRepo: todoRepo),

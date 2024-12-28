@@ -4,6 +4,7 @@
   - use BlocBuilder to listen to cubit state changes
 */
 
+import 'package:do_it/common_widget/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -70,41 +71,49 @@ class _TodoViewState extends State<TodoView> {
           ]
         ],
       ),
-      body: BlocBuilder<TodoCubit, List<Todo>>(
-        builder: (context, todos) {
-          return ListView.builder(
-            itemCount: todos.length,
-            itemBuilder: (context, index) {
-              final todo = todos[index];
+      body: SafeArea(
+        child: BlocBuilder<TodoCubit, List<Todo>>(
+          builder: (context, todos) {
+            return todos.isEmpty
+                ? const Center(
+                    child: TextWidget(
+                      text: 'No todo found!',
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: todos.length,
+                    itemBuilder: (context, index) {
+                      final todo = todos[index];
 
-              return GestureDetector(
-                onLongPress: () {
-                  // Enter multi-select mode
-                  setState(() {
-                    isSelectionMode = true;
-                  });
-                },
-                child: ListTileWidget(
-                  todoList: todo,
-                  // Keep your existing parameters
-                  isTrailingVisible: true,
-                  // New multi-select parameters:
-                  isSelectionMode: isSelectionMode,
-                  isSelected: selectedTodos.contains(todo),
-                  onSelected: (bool? selected) {
-                    setState(() {
-                      if (selected == true) {
-                        selectedTodos.add(todo);
-                      } else {
-                        selectedTodos.remove(todo);
-                      }
-                    });
-                  },
-                ),
-              );
-            },
-          );
-        },
+                      return GestureDetector(
+                        onLongPress: () {
+                          // Enter multi-select mode
+                          setState(() {
+                            isSelectionMode = true;
+                          });
+                        },
+                        child: ListTileWidget(
+                          todoList: todo,
+                          // Keep your existing parameters
+                          isTrailingVisible: true,
+                          // New multi-select parameters:
+                          isSelectionMode: isSelectionMode,
+                          isSelected: selectedTodos.contains(todo),
+                          onSelected: (bool? selected) {
+                            setState(() {
+                              if (selected == true) {
+                                selectedTodos.add(todo);
+                              } else {
+                                selectedTodos.remove(todo);
+                              }
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showBottomSheet(context),

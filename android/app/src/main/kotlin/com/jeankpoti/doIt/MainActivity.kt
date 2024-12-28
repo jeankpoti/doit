@@ -1,4 +1,4 @@
-package com.jeankpoti.doIt.do_it
+package com.jeankpoti.doit
 
 import io.flutter.embedding.android.FlutterActivity
 

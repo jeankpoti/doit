@@ -83,70 +83,72 @@ class _PomodoroSettingPageState extends State<PomodoroSettingPage> {
           padding: const EdgeInsets.all(16.0),
           height: 350,
           width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              SizedBox(
-                height: 250,
-                child: CupertinoPicker(
-                    itemExtent: timeList.length.toDouble(),
-                    onSelectedItemChanged: (int index) {
-                      switch (type) {
-                        case 'Focus Session':
-                          pomodoroCubit.workDurationChanged(
-                            timeList[index],
-                          );
-                          break;
-                        case 'Short Break':
-                          pomodoroCubit.shortBreakDurationChanged(
-                            timeList[index],
-                          );
-                          break;
-                        case 'Long Break':
-                          pomodoroCubit.longBreakDurationChanged(
-                            timeList[index],
-                          );
-                          break;
-                        case 'Long Break After':
-                          pomodoroCubit.setSessionCount(
-                            sessionList[index],
-                          );
-                          break;
-                        default:
-                          // Handle unknown type if necessary
-                          break;
-                      }
-                      // if (type == 'Focus Session') {
-                      //   pomodoroCubit.workDurationChanged(
-                      //     timeList[index],
-                      //   );
-                      // } else if (type == 'Short Break') {
-                      //   pomodoroCubit.shortBreakDurationChanged(
-                      //     timeList[index],
-                      //   );
-                      // } else if (type == 'Long Break') {
-                      //   pomodoroCubit.longBreakDurationChanged(
-                      //     timeList[index],
-                      //   );
-                      // } else if (type == 'Long Break After') {
-                      //   pomodoroCubit.setSessionCount(
-                      //     sessionList[index],
-                      //   );
-                      // }
-                    },
-                    children: type == 'Long Break After'
-                        ? List.generate(sessionList.length, (index) {
-                            return Text('${sessionList[index]} Session(s)');
-                          })
-                        : List.generate(timeList.length, (index) {
-                            return Text('${timeList[index]} min');
-                          })),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
-              )
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 250,
+                  child: CupertinoPicker(
+                      itemExtent: timeList.length.toDouble(),
+                      onSelectedItemChanged: (int index) {
+                        switch (type) {
+                          case 'Focus Session':
+                            pomodoroCubit.workDurationChanged(
+                              timeList[index],
+                            );
+                            break;
+                          case 'Short Break':
+                            pomodoroCubit.shortBreakDurationChanged(
+                              timeList[index],
+                            );
+                            break;
+                          case 'Long Break':
+                            pomodoroCubit.longBreakDurationChanged(
+                              timeList[index],
+                            );
+                            break;
+                          case 'Long Break After':
+                            pomodoroCubit.setSessionCount(
+                              sessionList[index],
+                            );
+                            break;
+                          default:
+                            // Handle unknown type if necessary
+                            break;
+                        }
+                        // if (type == 'Focus Session') {
+                        //   pomodoroCubit.workDurationChanged(
+                        //     timeList[index],
+                        //   );
+                        // } else if (type == 'Short Break') {
+                        //   pomodoroCubit.shortBreakDurationChanged(
+                        //     timeList[index],
+                        //   );
+                        // } else if (type == 'Long Break') {
+                        //   pomodoroCubit.longBreakDurationChanged(
+                        //     timeList[index],
+                        //   );
+                        // } else if (type == 'Long Break After') {
+                        //   pomodoroCubit.setSessionCount(
+                        //     sessionList[index],
+                        //   );
+                        // }
+                      },
+                      children: type == 'Long Break After'
+                          ? List.generate(sessionList.length, (index) {
+                              return Text('${sessionList[index]} Session(s)');
+                            })
+                          : List.generate(timeList.length, (index) {
+                              return Text('${timeList[index]} min');
+                            })),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Close'),
+                )
+              ],
+            ),
           ),
         );
       },
