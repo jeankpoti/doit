@@ -4,26 +4,43 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../common_widget/app_bar_widget.dart';
 import '../../../common_widget/button_widget.dart';
 import '../../../common_widget/text_form_field_widget.dart';
+import '../data/models/isar_todo.dart';
+import '../domain/models/todo.dart';
 import 'todo_cubit.dart';
 
-class AddTodoPage extends StatefulWidget {
-  const AddTodoPage({super.key});
+class UpdateTodoPage extends StatefulWidget {
+  final Todo todo;
+  const UpdateTodoPage({super.key, required this.todo});
 
   @override
-  State<AddTodoPage> createState() => _AddTodoPageState();
+  State<UpdateTodoPage> createState() => _UpdateTodoPageState();
 }
 
-class _AddTodoPageState extends State<AddTodoPage> {
+class _UpdateTodoPageState extends State<UpdateTodoPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  void validateAndSave(buildContext) {
+  @override
+  void initState() {
+    super.initState();
+
+    _titleController.text = widget.todo.title;
+    _descriptionController.text = widget.todo.description ?? '';
+  }
+
+  void validateAndUpdate(buildContext, todo) async {
     final FormState form = _formKey.currentState!;
     if (form.validate()) {
+      final todoToUpdate = TodoIsar()
+        ..id = todo.id
+        ..title = _titleController.text
+        ..description = _descriptionController.text
+        ..isCompleted = todo.isCompleted;
+
       final todoCubit = context.read<TodoCubit>();
-      todoCubit.addTodo(_titleController.text, _descriptionController.text);
+      todoCubit.updateTodo(todoToUpdate);
 
       _titleController.clear();
       _descriptionController.clear();
@@ -64,10 +81,10 @@ class _AddTodoPageState extends State<AddTodoPage> {
                   const SizedBox(height: 25),
                   ButtonWidget(
                     onPressed: () => {
-                      validateAndSave(context),
+                      validateAndUpdate(context, widget.todo),
                       Navigator.pop(context),
                     },
-                    text: 'Save'.toUpperCase(),
+                    text: 'Update'.toUpperCase(),
                   ),
                 ],
               ),

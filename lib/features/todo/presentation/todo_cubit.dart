@@ -34,8 +34,6 @@ class TodoCubit extends Cubit<List<Todo>> {
     // Get todos from the repo
     final completedTodos = await todoRepo.getCompletedTodos();
 
-    print('completedTodos: $completedTodos');
-
     // Emit the fecthed todos as the new state
     emit(completedTodos);
   }
@@ -51,8 +49,14 @@ class TodoCubit extends Cubit<List<Todo>> {
     // Add the todo to the repo
     await todoRepo.addTodo(newTodo);
 
-    // Re-load
-    loadTodos();
+    // // Re-load
+    // loadTodos();
+
+    // Get updated list
+    final updatedTodos = await todoRepo.getTodos();
+
+    // Emit new state immediately
+    emit(updatedTodos);
   }
 
   // Update a todo

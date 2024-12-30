@@ -20,8 +20,10 @@ void main() async {
   final dir = await getApplicationDocumentsDirectory();
 
   // Open isar database
-  final isar = await Isar.open([TodoIsarSchema, PomodoroSessionSchema],
-      directory: dir.path);
+  final isar = await Isar.open(
+    [TodoIsarSchema, PomodoroSessionSchema],
+    directory: dir.path,
+  );
 
   //initialize repo with isar database
   final isarTodoRepo = IsarTodoRepo(isar);
