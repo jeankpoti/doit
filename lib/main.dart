@@ -1,14 +1,16 @@
 import 'package:do_it/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:isar/isar.dart';
+// import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+// import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast_io.dart';
 
-import 'features/pomodoro/data/models/isar_pomodoro.dart';
+// import 'features/pomodoro/data/models/isar_pomodoro.dart';
 import 'features/pomodoro/data/repository/pomodoro_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_cubit.dart';
-import 'features/todo/data/models/isar_todo.dart';
-import 'features/todo/data/repository/isar_todo_repo.dart';
+// import 'features/todo/data/models/isar_todo.dart';
+import 'features/todo/data/repository/sembast_todo_repo.dart';
 import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/todo/presentation/todo_cubit.dart';
 import 'theme/theme_cubit.dart';
@@ -20,13 +22,16 @@ void main() async {
   final dir = await getApplicationDocumentsDirectory();
 
   // Open isar database
-  final isar = await Isar.open(
-    [TodoIsarSchema, PomodoroSessionSchema],
-    directory: dir.path,
-  );
+  // final isar = await Isar.open(
+  //   [TodoIsarSchema, PomodoroSessionSchema],
+  //   directory: dir.path,
+  // );
+
+  final dbPath = '${dir.path}/my_database.db';
+  final db = await databaseFactoryIo.openDatabase(dbPath);
 
   //initialize repo with isar database
-  final isarTodoRepo = IsarTodoRepo(isar);
+  final isarTodoRepo = SembastTodoRepo(db);
 
   final pomodoroRepo = IsarPomodoroRepo();
 

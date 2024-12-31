@@ -6,7 +6,7 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../data/models/isar_todo.dart';
+// import '../data/models/isar_todo.dart';
 import '../domain/models/todo.dart';
 import '../domain/repository/todo_repo.dart';
 
@@ -60,7 +60,15 @@ class TodoCubit extends Cubit<List<Todo>> {
   }
 
   // Update a todo
-  Future<void> updateTodo(TodoIsar todo) async {
+  // Future<void> updateTodo(TodoIsar todo) async {
+  //   // Update the todo in the repo
+  //   await todoRepo.updateTodo(todo);
+
+  //   // Re-load todos
+  //   loadTodos();
+  // }
+
+  Future<void> updateTodo(Todo todo) async {
     // Update the todo in the repo
     await todoRepo.updateTodo(todo);
 

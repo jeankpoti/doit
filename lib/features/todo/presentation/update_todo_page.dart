@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../common_widget/app_bar_widget.dart';
 import '../../../common_widget/button_widget.dart';
 import '../../../common_widget/text_form_field_widget.dart';
-import '../data/models/isar_todo.dart';
 import '../domain/models/todo.dart';
 import 'todo_cubit.dart';
 
@@ -33,11 +32,11 @@ class _UpdateTodoPageState extends State<UpdateTodoPage> {
   void validateAndUpdate(buildContext, todo) async {
     final FormState form = _formKey.currentState!;
     if (form.validate()) {
-      final todoToUpdate = TodoIsar()
-        ..id = todo.id
-        ..title = _titleController.text
-        ..description = _descriptionController.text
-        ..isCompleted = todo.isCompleted;
+      final todoToUpdate = Todo(
+          id: todo.id,
+          title: _titleController.text,
+          description: _descriptionController.text,
+          isCompleted: todo.isCompleted);
 
       final todoCubit = context.read<TodoCubit>();
       todoCubit.updateTodo(todoToUpdate);

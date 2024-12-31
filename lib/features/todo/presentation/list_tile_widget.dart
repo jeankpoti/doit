@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:isar/isar.dart';
 
-import '../../../common_widget/button_widget.dart';
+// import '../../../common_widget/button_widget.dart';
 import '../../../common_widget/icon_widget.dart';
-import '../../../common_widget/text_form_field_widget.dart';
+// import '../../../common_widget/text_form_field_widget.dart';
 import '../../../common_widget/text_widget.dart';
-import '../data/models/isar_todo.dart';
 import '../domain/models/todo.dart';
 import 'todo_cubit.dart';
 import 'update_todo_page.dart';
@@ -40,16 +38,16 @@ class ListTileWidget extends StatefulWidget {
 
 class _ListTileWidgetState extends State<ListTileWidget>
     with SingleTickerProviderStateMixin {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  // final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  // final _titleController = TextEditingController();
+  // final _descriptionController = TextEditingController();
 
   late AnimationController _animationController;
   late Animation<double> _fadeOutAnimation;
   late Animation<Offset> _slideAnimation;
 
-  final isar = Isar.getInstance();
+  // final isar = Isar.getInstance();
 
   @override
   void initState() {
@@ -148,22 +146,23 @@ class _ListTileWidgetState extends State<ListTileWidget>
     }
   }
 
-  void validateAndUpdate(buildContext, todo) async {
-    final FormState form = _formKey.currentState!;
-    if (form.validate()) {
-      final todoToUpdate = TodoIsar()
-        ..id = todo.id
-        ..title = _titleController.text
-        ..description = _descriptionController.text
-        ..isCompleted = todo.isCompleted;
+  // void validateAndUpdate(buildContext, todo) async {
+  //   final FormState form = _formKey.currentState!;
+  //   if (form.validate()) {
+  //     // final todoToUpdate = TodoIsar()
+  //     final todoToUpdate = TodoIsar()
+  //       ..id = todo.id
+  //       ..title = _titleController.text
+  //       ..description = _descriptionController.text
+  //       ..isCompleted = todo.isCompleted;
 
-      final todoCubit = context.read<TodoCubit>();
-      todoCubit.updateTodo(todoToUpdate);
+  //     final todoCubit = context.read<TodoCubit>();
+  //     // todoCubit.updateTodo(todoToUpdate);
 
-      _titleController.clear();
-      _descriptionController.clear();
-    } else {}
-  }
+  //     _titleController.clear();
+  //     _descriptionController.clear();
+  //   } else {}
+  // }
 
   @override
   Widget build(BuildContext context) {

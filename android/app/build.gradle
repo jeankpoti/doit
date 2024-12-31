@@ -8,6 +8,8 @@ plugins {
 android {
     namespace = "com.jeankpoti.doit"
     compileSdk = flutter.compileSdkVersion
+ 
+   
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -37,6 +39,9 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+
+
+  
 }
 
 flutter {

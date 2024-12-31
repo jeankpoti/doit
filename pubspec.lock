@@ -441,18 +441,10 @@ packages:
     source: hosted
     version: "1.0.5"
   isar:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: isar
       sha256: "99165dadb2cf2329d3140198363a7e7bff9bbd441871898a87e26914d25cf1ea"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0+1"
-  isar_flutter_libs:
-    dependency: "direct main"
-    description:
-      name: isar_flutter_libs
-      sha256: bc6768cc4b9c61aabff77152e7f33b4b17d2fc93134f7af1c3dd51500fe8d5e8
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0+1"
@@ -696,6 +688,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  sembast:
+    dependency: "direct main"
+    description:
+      name: sembast
+      sha256: f45edc5e34ed53d6e3d70df664b182e9abcf9c784f48184e5be4c079d2b865d6
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.0+1"
   shared_preferences:
     dependency: "direct main"
     description:

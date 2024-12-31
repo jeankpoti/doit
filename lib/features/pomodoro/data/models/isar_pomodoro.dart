@@ -1,7 +1,5 @@
 import 'package:isar/isar.dart';
 
-part 'isar_pomodoro.g.dart';
-
 @collection
 class PomodoroSession {
   Id id = Isar.autoIncrement; // Auto increment ID
