@@ -21,6 +21,7 @@ class IsarPomodoroRepo implements PomodoroRepo {
     int longBreakDuration,
     int sessionCount,
   ) async {
+    print(workDuration);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('workDuration', workDuration);
     await prefs.setInt('shortBreakDuration', shortBreakDuration);

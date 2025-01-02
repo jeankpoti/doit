@@ -33,6 +33,11 @@ class _PomodoroPageState extends State<PomodoroPage> {
       body: SafeArea(
         child: BlocBuilder<PomodoroCubit, PomodoroConfigState>(
             builder: (context, state) {
+          print(
+              'state.isRunning && !state.isPaused && !state.isBreak: ${state.isRunning && state.isPaused && state.isBreak}');
+
+          print('state.completedSessions: ${state.completedSessions}');
+
           return Column(
             spacing: 30,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -90,10 +95,13 @@ class _PomodoroPageState extends State<PomodoroPage> {
                         setState(() {
                           started = true;
                         });
-                        context.read<PomodoroCubit>().startBreak(
-                            state.completedSessions >= state.sessionCount
-                                ? state.longBreakDuration
-                                : state.shortBreakDuration);
+                        state.completedSessions >= state.sessionCount
+                            ? context
+                                .read<PomodoroCubit>()
+                                .startLongBreak(state.shortBreakDuration)
+                            : context
+                                .read<PomodoroCubit>()
+                                .startShortBreak(state.longBreakDuration);
                       },
                     ),
                     ElevatedButtonIconWidget(
@@ -108,7 +116,20 @@ class _PomodoroPageState extends State<PomodoroPage> {
                     ),
                   ],
                 )
-              else if (!state.isRunning && !state.isPaused)
+              else if (!state.isRunning && !state.isPaused && !state.isBreak)
+                ElevatedButtonIconWidget(
+                  text: 'Start',
+                  icon: const Icon(Icons.play_arrow, size: 40),
+                  onPressed: () {
+                    setState(() {
+                      started = true;
+                    });
+                    context
+                        .read<PomodoroCubit>()
+                        .startTimer(state.workDuration);
+                  },
+                )
+              else if (state.isRunning == false)
                 ElevatedButtonIconWidget(
                   text: 'Start',
                   icon: const Icon(Icons.play_arrow, size: 40),
