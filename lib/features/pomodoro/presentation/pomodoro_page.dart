@@ -13,13 +13,30 @@ class PomodoroPage extends StatefulWidget {
   State<PomodoroPage> createState() => _PomodoroPageState();
 }
 
-class _PomodoroPageState extends State<PomodoroPage> {
+class _PomodoroPageState extends State<PomodoroPage>
+    with WidgetsBindingObserver {
   bool started = false;
 
   @override
   void initState() {
     super.initState();
     context.read<PomodoroCubit>().loadSettings();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('App state: $state');
+    if (state == AppLifecycleState.resumed) {
+      print('App resumed');
+      context.read<PomodoroCubit>().resumeFromStorage();
+    }
   }
 
   @override
@@ -33,11 +50,6 @@ class _PomodoroPageState extends State<PomodoroPage> {
       body: SafeArea(
         child: BlocBuilder<PomodoroCubit, PomodoroConfigState>(
             builder: (context, state) {
-          print(
-              'state.isRunning && !state.isPaused && !state.isBreak: ${state.isRunning && state.isPaused && state.isBreak}');
-
-          print('state.completedSessions: ${state.completedSessions}');
-
           return Column(
             spacing: 30,
             mainAxisAlignment: MainAxisAlignment.center,

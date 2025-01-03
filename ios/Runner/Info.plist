@@ -45,11 +45,14 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIBackgroundModes</key>
+	<!-- <key>UIBackgroundModes</key>
     <array>
   	 	<string>audio</string>
 		<string>fetch</string>
 		<string>processing</string>
-    </array>
+    </array> -->
+	<key>NSLocalNotificationUsageDescription</key>
+    <string>This app uses local notifications to remind you about tasks and timer sessions.</string>
+
 </dict>
 </plist>

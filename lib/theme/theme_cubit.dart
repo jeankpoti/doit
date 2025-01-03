@@ -1,16 +1,24 @@
 import 'package:do_it/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeCubit extends Cubit<ThemeData> {
-  ThemeCubit() : super(lightMode);
-
   bool _isDarkMode = false;
 
-  bool get isDarkMode => _isDarkMode;
+  ThemeCubit(bool isDarkMode) : super(isDarkMode ? darkMode : lightMode) {
+    _isDarkMode = isDarkMode;
+  }
 
-  void toggleTheme() {
+  // bool get isDarkMode => _isDarkMode;
+
+  void toggleTheme() async {
     _isDarkMode = !_isDarkMode;
-    emit(isDarkMode ? darkMode : lightMode);
+
+    final prefs = await SharedPreferences.getInstance();
+
+    prefs.setBool('isDarkMode', _isDarkMode);
+
+    emit(_isDarkMode ? darkMode : lightMode);
   }
 }

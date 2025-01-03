@@ -2,10 +2,15 @@ import 'package:do_it/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart' as path;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io' show Platform;
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 import 'features/pomodoro/data/repository/pomodoro_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_cubit.dart';
@@ -14,28 +19,34 @@ import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/todo/presentation/todo_cubit.dart';
 import 'theme/theme_cubit.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isAndroid) {
-    // Initialize flutter_background for Android
-    const androidConfig = FlutterBackgroundAndroidConfig(
-      notificationTitle: "Pomodoro Timer",
-      notificationText: "Timer is running in the background",
-      notificationImportance: AndroidNotificationImportance.normal,
-      notificationIcon:
-          AndroidResource(name: 'background_icon', defType: 'drawable'),
-    );
+  final prefs = await SharedPreferences.getInstance();
+  final isDarkMode = prefs.getBool('isDarkMode') ?? false;
 
-    bool initialized =
-        await FlutterBackground.initialize(androidConfig: androidConfig);
-    if (!initialized) {
-      print('Failed to initialize background execution');
-    }
-  } else if (Platform.isIOS) {
-    // Handle iOS-specific background task initialization if needed
-    print('iOS does not support flutter_background plugin.');
-  }
+  // if (Platform.isAndroid) {
+  //   // Initialize flutter_background for Android
+  //   const androidConfig = FlutterBackgroundAndroidConfig(
+  //     notificationTitle: "Pomodoro Timer",
+  //     notificationText: "Timer is running in the background",
+  //     notificationImportance: AndroidNotificationImportance.high,
+  //     notificationIcon:
+  //         AndroidResource(name: 'background_icon', defType: 'drawable'),
+  //   );
+
+  //   bool initialized =
+  //       await FlutterBackground.initialize(androidConfig: androidConfig);
+  //   if (!initialized) {
+  //     print('Failed to initialize background execution');
+  //   }
+  // } else if (Platform.isIOS) {
+  //   // Handle iOS-specific background task initialization if needed
+  //   print('iOS does not support flutter_background plugin.');
+  // }
   // bool hasPermissions = await FlutterBackground.hasPermissions;
   // if (!hasPermissions) {
   //   hasPermissions = await FlutterBackground.reques();
@@ -43,6 +54,40 @@ void main() async {
   // if (hasPermissions) {
   //   await FlutterBackground.initialize(androidConfig: androidConfig);
   // }
+
+  // 1) Time zone initialization
+  tz.initializeTimeZones();
+
+  // Get the current time zone name
+  final String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
+
+  // Optionally set local location:
+  tz.setLocalLocation(tz.getLocation(timeZoneName));
+  // ^ Replace 'America/Detroit' with the user's actual time zone if known
+
+  // 2) Request (and/or check) notification permission on iOS/macOS
+  await _requestPermissions();
+
+  // 3) Initialize local notifications
+  const AndroidInitializationSettings androidSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const DarwinInitializationSettings iosSettings =
+      DarwinInitializationSettings();
+
+  const InitializationSettings initSettings = InitializationSettings(
+    android: androidSettings,
+    iOS: iosSettings,
+    macOS: iosSettings, // if you want to support macOS
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initSettings,
+    onDidReceiveNotificationResponse: (details) {
+      // Handle tapped notification if needed
+      debugPrint('Notification tapped: ${details.payload}');
+    },
+  );
 
   // get the application documents directory
   final dir = await getApplicationDocumentsDirectory();
@@ -64,7 +109,7 @@ void main() async {
         create: (context) => TodoCubit(isarTodoRepo),
       ), // Ensure this is added
       BlocProvider<ThemeCubit>(
-        create: (context) => ThemeCubit(),
+        create: (context) => ThemeCubit(isDarkMode),
       ), // Ensure this is added
       BlocProvider<PomodoroCubit>(
         create: (context) => PomodoroCubit(pomodoroRepo),
@@ -74,6 +119,27 @@ void main() async {
       todoRepo: isarTodoRepo,
     ),
   ));
+}
+
+/// For iOS/macOS: request notification permission
+Future<void> _requestPermissions() async {
+  final iosPlugin =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+  final macPlugin =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin>();
+
+  await iosPlugin?.requestPermissions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+  await macPlugin?.requestPermissions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 }
 
 class MyApp extends StatelessWidget {
