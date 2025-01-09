@@ -1,9 +1,10 @@
-import 'package:do_it/common_widget/settings_list_tile.dart';
 import 'package:do_it/theme/theme_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'common_widget/app_bar_widget.dart';
+import 'common_widget/settings_list_tile.dart';
+import 'features/account/presentation/sign_in_page.dart';
 import 'features/todo/presentation/completed_todo_page.dart';
 
 class SetingsPage extends StatefulWidget {
@@ -55,6 +56,20 @@ class _SetingsPageState extends State<SetingsPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CompletedTodoPage(),
+                  ),
+                ),
+              ),
+
+              SettingsListTile(
+                text: 'Sign in to Sync data',
+                icon: Icon(
+                  Icons.history,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SignInPage(),
                   ),
                 ),
               ),

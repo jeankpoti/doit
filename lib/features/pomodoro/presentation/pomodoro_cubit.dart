@@ -1,8 +1,6 @@
 // Pomodoro Cubit for State Management
 
 import 'dart:async';
-
-import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +8,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibration/vibration.dart';
 import 'dart:io' show Platform;
-import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../../main.dart';
@@ -76,31 +73,17 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
       remainingTime: _remainingTime,
     ));
 
-    // if (Platform.isAndroid) {
-    //   // Enable background execution for Android
-    //   await FlutterBackground.enableBackgroundExecution();
-    // } else if (Platform.isIOS) {
-    //   // Start background audio task for iOS
-    //   // await AudioService.init(
-    //   //   builder: () => MyAudioHandler(),
-    //   //   config: AudioServiceConfig(
-    //   //     androidNotificationChannelId: 'com.jeankpoti.doit.channel.audio',
-    //   //     androidNotificationChannelName: 'Music playback',
-    //   //   ),
-    //   // );
-    // }
-
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingTime > 0) {
         _remainingTime--;
         emit(state.copyWith(remainingTime: _remainingTime));
       } else {
         timer.cancel();
-        if (Platform.isAndroid) {
-          FlutterBackground.disableBackgroundExecution();
-        } else if (Platform.isIOS) {
-          AudioService.stop();
-        }
+        // if (Platform.isAndroid) {
+        //   FlutterBackground.disableBackgroundExecution();
+        // } else if (Platform.isIOS) {
+        //   AudioService.stop();
+        // }
 
         if (isBreak) {
           // End of break, reset to work session
@@ -137,11 +120,6 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
   void skipBreak() {
     _timer?.cancel(); // Stop the break timer
 
-    // if (Platform.isAndroid) {
-    //   FlutterBackground.disableBackgroundExecution();
-    // } else if (Platform.isIOS) {
-    //   AudioService.stop();
-    // }
     // Set completedSessions to 0 if skipping long break
     state.completedSessions >= state.sessionCount
         ? emit(state.copyWith(
@@ -163,12 +141,6 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
 
   void pauseTimer() {
     _timer?.cancel();
-
-    // if (Platform.isAndroid) {
-    //   FlutterBackground.disableBackgroundExecution();
-    // } else if (Platform.isIOS) {
-    //   AudioService.pause();
-    // }
 
     emit(state.copyWith(isRunning: false, isPaused: true));
   }
@@ -217,12 +189,6 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
 
   void stopTimer(String type) async {
     _timer?.cancel(); // Cancel the running timer
-
-    // if (Platform.isAndroid) {
-    //   FlutterBackground.disableBackgroundExecution();
-    // } else if (Platform.isIOS) {
-    //   AudioService.stop();
-    // }
 
     // Cancel the notification
     await cancelPomodoroNotification();
@@ -283,12 +249,6 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
     await playSound(soundPath);
     await triggerVibration();
   }
-
-  // void resetTimer() {
-  //   _timer?.cancel();
-  //   // _completedSessions = 0;
-  //   // emit(PomodoroInitial());
-  // }
 
   Future<void> schedulePomodoroNotification(int seconds,
       {String? payload}) async {
@@ -360,15 +320,12 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
     final elapsed = ((now - startTimestamp) / 1000).round();
     final remaining = duration - elapsed;
 
-    print('Remaining: $remaining');
-    print('State Remaining: ${state.remainingTime}');
-
     if (remaining <= 0) {
       // Timer ended
       _timer?.cancel();
       // The time should be finished
       // Update state accordingly
-      print('ddddd');
+
       emit(state.copyWith(
         isRunning: false,
         isPaused: false,
@@ -398,92 +355,3 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
     return super.close();
   }
 }
-
-// class PomodoroAudioHandler extends BaseAudioHandler {
-//   final AudioPlayer _audioPlayer = AudioPlayer();
-
-//   @override
-//   Future<void> play() async {
-//     // Example: play a short silent audio or your "clock alarm" loop
-//     // This ensures iOS sees real audio playing
-//     await _audioPlayer.play(UrlSource(
-//       'sounds/clock-alarm.mp3', // or local asset
-//     ));
-
-//     // Update the playback state so iOS/Android knows you're playing audio
-//     playbackState.add(
-//       playbackState.value.copyWith(
-//         playing: true,
-//         processingState: AudioProcessingState.ready,
-//         controls: [
-//           MediaControl.pause,
-//           MediaControl.stop,
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   Future<void> pause() async {
-//     await _audioPlayer.pause();
-//     playbackState.add(
-//       playbackState.value.copyWith(
-//         playing: false,
-//         controls: [
-//           MediaControl.play,
-//           MediaControl.stop,
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   Future<void> stop() async {
-//     await _audioPlayer.stop();
-//     playbackState.add(
-//       playbackState.value.copyWith(
-//         playing: false,
-//         processingState: AudioProcessingState.idle,
-//         controls: [],
-//       ),
-//     );
-//     super.stop();
-//   }
-// }
-
-// void _backgroundTaskEntrypoint() {
-//   AudioServiceBackground.run(() => PomodoroBackgroundTask());
-// }
-
-// class PomodoroBackgroundTask extends BackgroundAudioTask {
-//   final _player = AudioPlayer();
-
-//   @override
-//   Future<void> onStart(Map<String, dynamic>? params) async {
-//     // Play silent audio to maintain background execution on iOS
-//     await _player.play(AssetSource(
-//         'sounds/clock-alarm.mp3')); // Replace with your silent audio file
-//     _player.setReleaseMode(ReleaseMode.loop);
-//   }
-
-//   @override
-//   Future<void> onStop() async {
-//     // Handle background task stop
-//     await _player.stop();
-//     await super.onStop();
-//   }
-
-//   @override
-//   Future<void> onPause() async {
-//     // Handle background task pause
-//     await _player.pause();
-//     await super.onPause();
-//   }
-
-//   @override
-//   Future<void> onPlay() async {
-//     // Handle background task play
-//     await _player.play(AssetSource('sounds/clock-alarm.mp3'));
-//     await super.onPlay();
-//   }
-// }

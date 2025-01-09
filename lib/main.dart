@@ -1,6 +1,5 @@
 import 'package:do_it/splash_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
@@ -8,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io' show Platform;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -28,33 +26,6 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;
 
-  // if (Platform.isAndroid) {
-  //   // Initialize flutter_background for Android
-  //   const androidConfig = FlutterBackgroundAndroidConfig(
-  //     notificationTitle: "Pomodoro Timer",
-  //     notificationText: "Timer is running in the background",
-  //     notificationImportance: AndroidNotificationImportance.high,
-  //     notificationIcon:
-  //         AndroidResource(name: 'background_icon', defType: 'drawable'),
-  //   );
-
-  //   bool initialized =
-  //       await FlutterBackground.initialize(androidConfig: androidConfig);
-  //   if (!initialized) {
-  //     print('Failed to initialize background execution');
-  //   }
-  // } else if (Platform.isIOS) {
-  //   // Handle iOS-specific background task initialization if needed
-  //   print('iOS does not support flutter_background plugin.');
-  // }
-  // bool hasPermissions = await FlutterBackground.hasPermissions;
-  // if (!hasPermissions) {
-  //   hasPermissions = await FlutterBackground.reques();
-  // }
-  // if (hasPermissions) {
-  //   await FlutterBackground.initialize(androidConfig: androidConfig);
-  // }
-
   // 1) Time zone initialization
   tz.initializeTimeZones();
 
@@ -63,7 +34,6 @@ void main() async {
 
   // Optionally set local location:
   tz.setLocalLocation(tz.getLocation(timeZoneName));
-  // ^ Replace 'America/Detroit' with the user's actual time zone if known
 
   // 2) Request (and/or check) notification permission on iOS/macOS
   await _requestPermissions();

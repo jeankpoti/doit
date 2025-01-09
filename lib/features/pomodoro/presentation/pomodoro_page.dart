@@ -32,9 +32,9 @@ class _PomodoroPageState extends State<PomodoroPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('App state: $state');
+    // print('App state: $state');
     if (state == AppLifecycleState.resumed) {
-      print('App resumed');
+      // print('App resumed');
       context.read<PomodoroCubit>().resumeFromStorage();
     }
   }
