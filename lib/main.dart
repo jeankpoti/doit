@@ -1,4 +1,5 @@
 import 'package:do_it/splash_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -10,11 +11,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'features/account/data/repository/account_repo.dart';
+import 'features/account/domain/repository/account_repo.dart';
+import 'features/account/presentation/account_cubit.dart';
 import 'features/pomodoro/data/repository/pomodoro_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_cubit.dart';
 import 'features/todo/data/repository/sembast_todo_repo.dart';
 import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/todo/presentation/todo_cubit.dart';
+import 'firebase_options.dart';
 import 'theme/theme_cubit.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -22,6 +27,12 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // This is critical: must happen *before* runApp().
+  await Firebase.initializeApp(
+    options:
+        DefaultFirebaseOptions.currentPlatform, // If using the FlutterFire CLI
+  );
 
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;
@@ -73,6 +84,8 @@ void main() async {
 
   final pomodoroRepo = IsarPomodoroRepo();
 
+  final accountRepo = FirebaseRepo();
+
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<TodoCubit>(
@@ -83,6 +96,9 @@ void main() async {
       ), // Ensure this is added
       BlocProvider<PomodoroCubit>(
         create: (context) => PomodoroCubit(pomodoroRepo),
+      ),
+      BlocProvider<AccountCubit>(
+        create: (context) => AccountCubit(accountRepo),
       ),
     ],
     child: MyApp(

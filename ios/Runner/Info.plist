@@ -48,6 +48,16 @@
 	<true/>
 	<key>NSLocalNotificationUsageDescription</key>
     <string>This app uses local notifications to remind you about tasks and timer sessions.</string>
-
+    <key>CFBundleURLTypes</key>
+	<array>
+	<dict>
+		<key>CFBundleTypeRole</key>
+		<string>Editor</string>
+		<key>CFBundleURLSchemes</key>
+		<array>
+		<string>com.googleusercontent.apps.662658703999-f2m30h0871bsaoqn3d9ngmigkd3502qv</string>
+		</array>
+	</dict>
+	</array>
 </dict>
 </plist>

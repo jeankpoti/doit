@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "662658703999",
+    "project_id": "work-snap",
+    "storage_bucket": "work-snap.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662658703999:android:8f0d5059ae13b02285954a",
+        "android_client_info": {
+          "package_name": "com.jeankpoti.worksnap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDArK6JJayh-iYzFeTRyW_WSf64xQ3pPGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

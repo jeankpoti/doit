@@ -15,7 +15,7 @@ import 'list_tile_widget.dart';
 import 'todo_cubit.dart';
 
 class TodoPage extends StatefulWidget {
-  final TodoRepo todoRepo;
+  final TodoRepo? todoRepo;
   const TodoPage({super.key, required this.todoRepo});
 
   @override

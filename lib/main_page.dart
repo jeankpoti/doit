@@ -9,8 +9,8 @@ import 'features/todo/presentation/todo_page.dart';
 import 'settings_page.dart';
 
 class MainPage extends StatefulWidget {
-  final TodoRepo todoRepo;
-  const MainPage({super.key, required this.todoRepo});
+  final TodoRepo? todoRepo;
+  const MainPage({super.key, this.todoRepo});
 
   @override
   State<MainPage> createState() => _MainPageState();
