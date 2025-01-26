@@ -12,8 +12,8 @@ abstract class AccountRepo {
     String password,
     context,
   );
-  Future<void> signInWithGooogle();
-  Future<void> signInWithApple();
+  Future<void> signInWithGooogle(context);
+  Future<void> signInWithApple(context);
   Future<void> signUpWithEmailAndPassword(
     String fullName,
     String email,
@@ -21,9 +21,9 @@ abstract class AccountRepo {
     context,
   );
   Future<void> signUpWithGoogle(context);
-  Future<void> signUpWithApple();
+  Future<void> signUpWithApple(context);
   Future<void> signOut();
-  Future<void> resetPassword();
+  Future<void> resetPassword(context, String email);
 }
 
 /*

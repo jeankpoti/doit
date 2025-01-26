@@ -1,4 +1,6 @@
+import 'package:do_it/features/account/presentation/account_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../common_widget/app_bar_widget.dart';
 import '../../../common_widget/button_widget.dart';
@@ -32,9 +34,11 @@ class _ResetPasswordpageState extends State<ResetPasswordpage> {
   void validateAndSend(buildContext) {
     final FormState form = _formKey.currentState!;
     if (form.validate()) {
-      // ref
-      //     .read(resetPasswordControllerProvider.notifier)
-      //     .sendPasswordResetEmail(context, _emailController.text.trim());
+      final accountCubit = context.read<AccountCubit>();
+      accountCubit.resetPassword(
+        context,
+        _emailController.text.trim(),
+      );
     } else {}
   }
 

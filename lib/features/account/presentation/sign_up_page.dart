@@ -243,9 +243,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                       const SizedBox(height: 25),
                                     if (Platform.isIOS)
                                       AppleSigninButtonWidget(
-                                        onPressed: () => {
-                                          // signUpController.signUpWithApple(context),
-                                        },
+                                        onPressed: () => accountCubit
+                                            .signUpWithApple(context),
                                         text: Text(
                                           ' Apple',
                                           style: TextStyle(

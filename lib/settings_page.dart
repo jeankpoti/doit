@@ -8,6 +8,7 @@ import 'common_widget/error_message_widget.dart';
 import 'common_widget/settings_list_tile.dart';
 import 'features/account/presentation/account_cubit.dart';
 import 'features/account/presentation/account_state.dart';
+import 'features/account/presentation/reset_password_page.dart';
 import 'features/account/presentation/sign_in_page.dart';
 import 'features/todo/presentation/completed_todo_page.dart';
 
@@ -110,6 +111,19 @@ class _SetingsPageState extends State<SetingsPage> {
                           await accountCubit.signOut();
                         },
                       ),
+                    SettingsListTile(
+                      text: 'Reset Password',
+                      icon: Icon(
+                        Icons.logout,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ResetPasswordpage(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );

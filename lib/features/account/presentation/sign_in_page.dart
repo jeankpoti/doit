@@ -63,6 +63,8 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final accountCubit = context.read<AccountCubit>();
+
     return Scaffold(
       appBar: const AppBarWidget(
         title: 'Sign In',
@@ -224,9 +226,10 @@ class _SignInPageState extends State<SignInPage> {
                                     ),
                                     const SizedBox(height: 25),
                                     GoogleSigninButtonWidget(
-                                      onPressed: () => {
-                                        // signInController.signInWithGoogle(context),
-                                      },
+                                      onPressed: () =>
+                                          accountCubit.signInWithGooogle(
+                                        context,
+                                      ),
                                       text: Text(
                                         ' Google',
                                         style: TextStyle(
@@ -242,9 +245,10 @@ class _SignInPageState extends State<SignInPage> {
                                       const SizedBox(height: 25),
                                     if (Platform.isIOS)
                                       AppleSigninButtonWidget(
-                                        onPressed: () => {
-                                          // signInController.signInWithApple(context),
-                                        },
+                                        onPressed: () =>
+                                            accountCubit.signInWithApple(
+                                          context,
+                                        ),
                                         text: Text(
                                           ' Apple',
                                           style: TextStyle(

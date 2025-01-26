@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../../common_widget/error_message_widget.dart';
 import '../../domain/repository/account_repo.dart';
@@ -8,6 +9,7 @@ import '../../domain/repository/account_repo.dart';
 class FirebaseRepo implements AccountRepo {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   Future<void> signInWithEmailAndPassword(
@@ -59,24 +61,128 @@ class FirebaseRepo implements AccountRepo {
   }
 
   @override
-  Future<void> signInWithApple() {
-    // TODO: implement signInWithApple
-    throw UnimplementedError();
+  Future<void> signInWithApple(context) async {
+    try {
+      // Request an Apple ID Credential
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        // webAuthenticationOptions: WebAuthenticationOptions(
+        //   clientId: 'com.jeankpoti.studybuddy',
+        //   redirectUri: Uri.parse(
+        //     'https://humble-achieved-collision.glitch.me/callbacks/sign_in_with_apple',
+        //   ),
+        // ),
+      );
+
+      // Create an OAuth credential for Firebase
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      // Use the credential to sign in with Firebase
+      final authResult =
+          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+      // Get the current user
+      final user = authResult.user;
+
+      if (user != null) {
+        // Check if this is a new user
+        if (authResult.additionalUserInfo?.isNewUser ?? false) {
+          ErrorMessageWidget.showError(
+            context,
+            "Account not found. Please sign up first!",
+          );
+        } else {
+          // if (context.mounted) {
+          //   //Navigate to the home screen
+          //   // GoRouter.of(context).pushReplacementNamed(AppRoute.mainView.name);
+          // }
+        }
+      }
+    } catch (e) {
+      ErrorMessageWidget.showError(
+        context,
+        "Unexpected error occurred!",
+      );
+    }
   }
 
   @override
-  Future<void> signInWithGooogle() {
-    // TODO: implement signInWithGooogle
-    throw UnimplementedError();
+  Future<void> signInWithGooogle(context) async {
+    try {
+      // Start Google Sign In flow
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
+
+      if (googleSignInAccount == null) {
+        throw Exception('Google Sign In was cancelled');
+      }
+
+      // Get Google authentication
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      // Check if user exists in Firestore before signing in
+      final String email = googleSignInAccount.email;
+      final userQuery = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (userQuery.docs.isEmpty) {
+        // User doesn't exist in our database
+        await _googleSignIn.signOut(); // Sign out from Google
+
+        if (context.mounted) {
+          ErrorMessageWidget.showError(
+            context,
+            "Account not found. Please sign up first!",
+          );
+        }
+        return;
+      }
+
+      // Proceed with Firebase sign in if user exists
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        // Navigate to the home screen
+        // GoRouter.of(context).pushReplacementNamed(AppRoute.mainView.name);
+      }
+    } on FirebaseAuthException {
+      if (context.mounted) {
+        ErrorMessageWidget.showError(
+          context,
+          "An authentication error occurred!",
+        );
+      }
+    } catch (error) {
+      // if (context.mounted) {
+      //   ErrorMessageWidget.showError(
+      //     context,
+      //     "An unexpected error occurred!",
+      //   );
+      // }
+    }
   }
 
   @override
   Future<UserCredential> signUpWithGoogle(context) async {
-    GoogleSignIn googleSignIn = GoogleSignIn();
-
     try {
       // Trigger the Google Sign In flow
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         throw Exception('Google Sign In was cancelled');
@@ -121,11 +227,8 @@ class FirebaseRepo implements AccountRepo {
               .set({
             'displayName': googleUser.displayName,
             'email': googleUser.email,
-            'freeQuota': 1000,
-            'usedQuota': 0,
-            'subscriptionType': 'free',
-            'lastReset': FieldValue.serverTimestamp(), // Use server timestamp
-            'createdAt': FieldValue.serverTimestamp(),
+            'isSubscribed': false, // Free subscription
+            'createdAt': DateTime.now(),
           });
         } catch (firestoreError) {
           // You might want to delete the Firebase Auth user if Firestore save fails
@@ -146,9 +249,99 @@ class FirebaseRepo implements AccountRepo {
   }
 
   @override
-  Future<void> signUpWithApple() {
-    // TODO: implement signUpWithApple
-    throw UnimplementedError();
+  Future<UserCredential> signUpWithApple(context) async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oAuthProvider = OAuthProvider('apple.com');
+      final credential = oAuthProvider.credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      // Once signed in, return the UserCredential
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      // Get the current user
+      final user = userCredential.user;
+
+      if (user != null) {
+        // Check if this is a new user
+        if (userCredential.additionalUserInfo?.isNewUser != null) {
+          if (!userCredential.additionalUserInfo!.isNewUser) {
+            if (context.mounted) {
+              ErrorMessageWidget.showError(
+                  context, "You have already signed up. Please sign in!");
+            }
+            return Future.error(
+                'Account already exists. Please sign in instead.');
+          } else {}
+        }
+      }
+
+      // Save the user's information to Firestore
+      await _firestore.collection('users').doc(userCredential.user?.uid).set({
+        'fullName':
+            '${appleCredential.familyName} ${appleCredential.givenName}',
+        'email': appleCredential.email,
+        'isSubscribed': false, // Free subscription
+        'createdAt': DateTime.now(),
+      });
+
+      // _signUpWithAppleSuccess = true;
+
+      return userCredential;
+    } catch (e) {
+      // Handle error
+      String errorMessage;
+      if (e is FirebaseAuthException) {
+        switch (e.code) {
+          case 'account-exists-with-different-credential':
+            errorMessage =
+                'This account exists with a different sign-in provider.';
+            break;
+          case 'invalid-credential':
+            errorMessage =
+                'The credential received is malformed or has expired.';
+            break;
+          case 'operation-not-allowed':
+            errorMessage =
+                'This operation is not allowed. Please enable it in the Firebase console.';
+            break;
+          case 'user-disabled':
+            errorMessage =
+                'This user has been disabled. Please contact support for help.';
+            break;
+          case 'user-not-found':
+            errorMessage = 'No user found for the provided credentials.';
+            break;
+          case 'wrong-password':
+            errorMessage =
+                'The password is invalid or the user does not have a password.';
+            break;
+          case 'invalid-verification-code':
+            errorMessage = 'The verification code is invalid.';
+            break;
+          case 'invalid-verification-id':
+            errorMessage = 'The verification ID is invalid.';
+            break;
+          default:
+            errorMessage = 'An unknown error occurred.';
+        }
+      } else {
+        errorMessage = 'An unknown error occurred.';
+      }
+
+      // Show error message
+      ErrorMessageWidget.showError(context, errorMessage);
+    }
+    return Future.error('An error occurred while signing up with Apple.');
   }
 
   @override
@@ -221,8 +414,30 @@ class FirebaseRepo implements AccountRepo {
   }
 
   @override
-  Future<void> resetPassword() {
-    // TODO: implement resetPassword
-    throw UnimplementedError();
+  Future<void> resetPassword(context, String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      // Show a message to the user indicating that the email was sent
+
+      ErrorMessageWidget.showError(
+        context,
+        "Password reset email will be sent to your email if the email exist in our system. Check your inbox.",
+      );
+
+      // _success = true;
+    } on FirebaseAuthException catch (e) {
+      // Handle errors, such as invalid email
+
+      ErrorMessageWidget.showError(
+        context,
+        "Failed to send password reset email: ${e.message}",
+      );
+    } catch (e) {
+      // Handle any other errors
+      ErrorMessageWidget.showError(
+        context,
+        "An unexpected error occurred. Please try again.",
+      );
+    }
   }
 }
