@@ -59,6 +59,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
                   TextFormFieldWidget(
                     controller: _descriptionController,
                     labelText: 'Enter your todo\'s description',
+                    maxLine: 100,
                     validator: (value) => value!.isEmpty ? null : '',
                   ),
                   const SizedBox(height: 25),

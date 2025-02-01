@@ -15,6 +15,7 @@ abstract class TodoRepo {
   Future<void> toggleTodoStatus(Todo todo);
   Future<List<Todo>> getTodos();
   Future<List<Todo>> getCompletedTodos();
+  Future<void> syncTodosIfNeeded();
 }
 
 /*

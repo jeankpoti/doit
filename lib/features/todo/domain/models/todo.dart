@@ -5,35 +5,76 @@ class Todo extends Equatable {
   final String title;
   final String? description;
   final bool isCompleted;
+  final bool needsSync;
+  final bool pendingDelete;
   final DateTime createdAt;
+  final DateTime? updatedAt;
 
   Todo({
     required this.id,
     required this.title,
     this.description,
     this.isCompleted = false,
+    this.needsSync = false,
+    this.pendingDelete = false,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
+  // For local or remote serialization
   factory Todo.fromJson(Map<String, dynamic> json) {
     return Todo(
       id: json['id'] as int,
       title: json['title'] as String,
       description: json['description'] as String?,
       isCompleted: json['isCompleted'] as bool? ?? false,
+      needsSync: json['needsSync'] as bool? ?? false,
+      pendingDelete: json['pendingDelete'] as bool? ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
           : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'description': description,
       'isCompleted': isCompleted,
+      'needsSync': needsSync,
+      'pendingDelete': pendingDelete,
       'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
+  }
+
+  // Helper copyWith for immutability
+  Todo copyWith({
+    int? id,
+    String? title,
+    String? description,
+    bool? isCompleted,
+    bool? needsSync,
+    bool? pendingDelete,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    // DateTime? lastModified,
+  }) {
+    return Todo(
+      id: id ?? this.id,
+      title: title ?? '',
+      description: description,
+      isCompleted: isCompleted ?? this.isCompleted,
+      needsSync: needsSync ?? this.needsSync,
+      pendingDelete: pendingDelete ?? this.pendingDelete,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
   }
 
   Todo toggleCompletion() {
@@ -42,7 +83,10 @@ class Todo extends Equatable {
       title: title,
       description: description,
       isCompleted: !isCompleted,
+      needsSync: needsSync,
+      pendingDelete: pendingDelete,
       createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 
@@ -52,6 +96,9 @@ class Todo extends Equatable {
         title,
         description,
         isCompleted,
+        needsSync,
+        pendingDelete,
         createdAt,
+        updatedAt,
       ];
 }

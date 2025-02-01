@@ -13,10 +13,9 @@ import '../../../common_widget/text_form_field_widget.dart';
 import '../../../common_widget/text_widget.dart';
 import '../../../common_widget/title_large_text_widget.dart';
 import '../../../helpers/validator.dart';
-import '../../../main_page.dart';
+
 import '../../../settings_page.dart';
-import '../../todo/domain/repository/todo_repo.dart';
-import '../../todo/presentation/todo_page.dart';
+
 import 'account_cubit.dart';
 import 'account_state.dart';
 import 'reset_password_page.dart';

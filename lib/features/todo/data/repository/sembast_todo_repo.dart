@@ -8,17 +8,15 @@
 // */
 
 import 'package:do_it/features/todo/domain/models/todo.dart';
-import 'package:do_it/features/todo/domain/repository/todo_repo.dart';
 import 'package:sembast/sembast.dart';
 
-class SembastTodoRepo implements TodoRepo {
+class SembastTodoRepo {
   final Database db;
   final StoreRef<int, Map<String, dynamic>> _todoStore =
       intMapStoreFactory.store('todos');
 
   SembastTodoRepo(this.db);
 
-  @override
   Future<List<Todo>> getTodos() async {
     final records = await _todoStore.find(
       db,
@@ -34,7 +32,6 @@ class SembastTodoRepo implements TodoRepo {
         .toList();
   }
 
-  @override
   Future<List<Todo>> getCompletedTodos() async {
     final records = await _todoStore.find(
       db,
@@ -50,7 +47,7 @@ class SembastTodoRepo implements TodoRepo {
         .toList();
   }
 
-  @override
+  // In SembastTodoRepo
   Future<void> addTodo(Todo newTodo) async {
     final todoJson = newTodo.toJson();
     todoJson['createdAt'] =
@@ -58,7 +55,6 @@ class SembastTodoRepo implements TodoRepo {
     await _todoStore.record(newTodo.id).put(db, todoJson);
   }
 
-  @override
   Future<void> toggleTodoStatus(Todo todo) async {
     final record = _todoStore.record(todo.id);
     final exists = await record.exists(db);
@@ -77,7 +73,6 @@ class SembastTodoRepo implements TodoRepo {
     }
   }
 
-  @override
   Future<void> updateTodo(Todo todo) async {
     final record = _todoStore.record(todo.id);
     final exists = await record.exists(db);
@@ -89,6 +84,7 @@ class SembastTodoRepo implements TodoRepo {
         ...todo.toJson(),
         'createdAt': existingTodo?['createdAt'] ??
             DateTime.now().toIso8601String(), // Preserve original creation time
+        'updatedAt': DateTime.now().toIso8601String(),
       };
       await record.put(db, updatedTodo);
     } catch (e) {
@@ -96,9 +92,44 @@ class SembastTodoRepo implements TodoRepo {
     }
   }
 
-  @override
+  // SembastTodoRepo
+// @override
   Future<void> deleteTodo(Todo todo) async {
+    print('Deleting todo: ${todo.isCompleted}');
+    // If we truly want to remove from local, we'd do:
+    // await _store.record(todoId).delete(db);
+
+    // Instead, mark the existing record as pendingDelete
+    final record = await _todoStore.record(todo.id).get(db);
+    if (record != null) {
+      final existingTodo = Todo.fromJson(record);
+      final updatedTodo = existingTodo.copyWith(
+        id: todo.id,
+        title: todo.title,
+        description: todo.description,
+        isCompleted: todo.isCompleted,
+        needsSync: false,
+        pendingDelete: true,
+        createdAt: todo.createdAt,
+        updatedAt: todo.updatedAt,
+      );
+      await _todoStore.record(todo.id).put(db, updatedTodo.toJson());
+    }
+  }
+
+  Future<void> deleteTodoPermanently(Todo todo) async {
     await _todoStore.record(todo.id).delete(db);
+  }
+
+  // Future<void> deleteTodo(Todo todo) async {
+  //   await _todoStore.record(todo.id).delete(db);
+  // }
+
+  Future<void> syncTodosIfNeeded() {
+    // Local-only: no-op by default
+
+    // TODO: implement syncTodosIfNeeded
+    throw UnimplementedError();
   }
 }
 

@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:do_it/splash_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart' as path;
@@ -16,6 +19,8 @@ import 'features/account/domain/repository/account_repo.dart';
 import 'features/account/presentation/account_cubit.dart';
 import 'features/pomodoro/data/repository/pomodoro_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_cubit.dart';
+import 'features/todo/data/repository/firebase_todo_repo.dart';
+import 'features/todo/data/repository/hybrid_todo_repo.dart';
 import 'features/todo/data/repository/sembast_todo_repo.dart';
 import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/todo/presentation/todo_cubit.dart';
@@ -33,6 +38,7 @@ void main() async {
     options:
         DefaultFirebaseOptions.currentPlatform, // If using the FlutterFire CLI
   );
+  final firestore = FirebaseFirestore.instance;
 
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;
@@ -86,10 +92,30 @@ void main() async {
 
   final accountRepo = FirebaseRepo();
 
+  final localRepo = SembastTodoRepo(db);
+  final remoteRepo = FirebaseTodoRepo(firestore);
+  final hybridTodoRepo =
+      HybridTodoRepo(localRepo: localRepo, remoteRepo: remoteRepo);
+
+  final listener =
+      InternetConnection().onStatusChange.listen((InternetStatus status) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    switch (status) {
+      case InternetStatus.connected:
+        // The internet is now connected
+        if (user != null) hybridTodoRepo.syncTodosIfNeeded();
+        break;
+      case InternetStatus.disconnected:
+        // The internet is now disconnected
+        break;
+    }
+  });
+
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<TodoCubit>(
-        create: (context) => TodoCubit(isarTodoRepo),
+        create: (context) => TodoCubit(hybridTodoRepo),
       ), // Ensure this is added
       BlocProvider<ThemeCubit>(
         create: (context) => ThemeCubit(isDarkMode),
@@ -98,11 +124,11 @@ void main() async {
         create: (context) => PomodoroCubit(pomodoroRepo),
       ),
       BlocProvider<AccountCubit>(
-        create: (context) => AccountCubit(accountRepo),
+        create: (context) => AccountCubit(accountRepo, hybridTodoRepo),
       ),
     ],
     child: MyApp(
-      todoRepo: isarTodoRepo,
+      todoRepo: hybridTodoRepo,
     ),
   ));
 }

@@ -1,5 +1,6 @@
 import 'package:do_it/common_widget/loader_widget.dart';
 import 'package:do_it/theme/theme_cubit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -48,6 +49,8 @@ class _SetingsPageState extends State<SetingsPage> {
           },
           child: BlocBuilder<AccountCubit, AccountState>(
             builder: (context, accountState) {
+              final user = FirebaseAuth.instance.currentUser;
+
               if (accountState.isLoading) {
                 return const Center(child: LoaderWidget());
               }
@@ -86,20 +89,21 @@ class _SetingsPageState extends State<SetingsPage> {
                         ),
                       ),
                     ),
-                    SettingsListTile(
-                      text: 'Sign in to Sync data',
-                      icon: Icon(
-                        Icons.person,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignInPage(),
+                    if (user == null)
+                      SettingsListTile(
+                        text: 'Sign in to Sync data',
+                        icon: Icon(
+                          Icons.person,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInPage(),
+                          ),
                         ),
                       ),
-                    ),
-                    if (accountState.isSignIn)
+                    if (user != null)
                       SettingsListTile(
                         text: 'Sign out',
                         icon: Icon(

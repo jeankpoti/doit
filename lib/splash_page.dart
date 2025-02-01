@@ -71,7 +71,8 @@ class _SplashPageState extends State<SplashPage>
 
   Future<void> _navigateToNext() async {
     // Wait for splash animation
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 1));
 
     if (!mounted) return;
 

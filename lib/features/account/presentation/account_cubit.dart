@@ -6,14 +6,19 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../todo/data/repository/hybrid_todo_repo.dart';
 import '../domain/repository/account_repo.dart';
 import 'account_state.dart';
 
 class AccountCubit extends Cubit<AccountState> {
   // Reference  todo repo
   final AccountRepo accountRepo;
+  final HybridTodoRepo hybridTodoRepo; // <--- We have access to set isSignedIn
 
-  AccountCubit(this.accountRepo) : super(const AccountState());
+  AccountCubit(
+    this.accountRepo,
+    this.hybridTodoRepo,
+  ) : super(const AccountState());
 
   // signInWithApple
   Future<void> signInWithApple(context) async {
@@ -30,6 +35,10 @@ class AccountCubit extends Cubit<AccountState> {
         isSignIn: true,
         errorMsg: null,
       ));
+
+      // If successful:
+      // hybridTodoRepo.isSignedIn = true; // <--- Turn on remote sync
+      await hybridTodoRepo.syncTodosIfNeeded(); // optional immediate sync
     } catch (e) {
       // On error -> isLoading: false, error message
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
@@ -124,9 +133,16 @@ class AccountCubit extends Cubit<AccountState> {
         isSignOut: true,
         errorMsg: null,
       ));
+      // hybridTodoRepo.isSignedIn = false;
     } catch (e) {
       // On error -> isLoading: false, error message
-      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isSignIn: false,
+          errorMsg: e.toString(),
+        ),
+      );
     }
   }
 
@@ -190,5 +206,9 @@ class AccountCubit extends Cubit<AccountState> {
       // On error -> isLoading: false, error message
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
     }
+  }
+
+  bool checkSignInStatus() {
+    return state.isSignIn;
   }
 }
