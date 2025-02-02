@@ -32,11 +32,7 @@ class HybridTodoRepo implements TodoRepo {
   Future<List<Todo>> getTodos() async {
     await checkConnectivity();
     // Always return local data first for instant UI
-    final todos = await localRepo.getTodos();
-
-    for (final todo in todos) {
-      print('Local todo: ${todo.pendingDelete}');
-    }
+    await localRepo.getTodos();
 
     // If signed in & online, fetch remote and attempt to merge
     if (user != null && isOnline) {
@@ -122,8 +118,6 @@ class HybridTodoRepo implements TodoRepo {
     // 1) Pull remote changes
     final remoteTodos = await remoteRepo.getTodos();
 
-    print('remoteTodos: $remoteTodos');
-
     // 2) Merge remote into local
     await _mergeRemoteIntoLocal(remoteTodos);
 
@@ -137,8 +131,6 @@ class HybridTodoRepo implements TodoRepo {
 
     // 1) For normal updates: find todos with needsSync = true
     final pendingUpdates = localTodos.where((t) => t.needsSync).toList();
-
-    print('pendingUpdates: $pendingUpdates');
 
     for (final todo in pendingUpdates) {
       await remoteRepo.addOrUpdateTodo(todo);

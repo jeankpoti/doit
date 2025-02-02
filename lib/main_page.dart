@@ -5,6 +5,7 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_page.dart';
+import 'features/todo/presentation/statistics_page.dart';
 import 'features/todo/presentation/todo_page.dart';
 import 'settings_page.dart';
 
@@ -32,6 +33,7 @@ class _MainPageState extends State<MainPage> {
         todoRepo: widget.todoRepo,
       ),
       const PomodoroPage(),
+      const StatisticsPage(),
       const SetingsPage(),
     ];
   }
@@ -53,6 +55,15 @@ class _MainPageState extends State<MainPage> {
           size: 20,
         ),
         title: 'Pomodoro',
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const FaIcon(
+          FontAwesomeIcons.chartBar,
+          size: 20,
+        ),
+        title: 'Statistics',
         activeColorPrimary: Theme.of(context).colorScheme.primary,
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),

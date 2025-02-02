@@ -8,6 +8,7 @@ import '../domain/repository/todo_repo.dart';
 import 'add_todo_page.dart';
 import 'list_tile_widget.dart';
 import 'todo_cubit.dart';
+import 'todo_details_page.dart';
 import 'todo_state.dart';
 
 class TodoPage extends StatefulWidget {
@@ -99,6 +100,12 @@ class _TodoPageState extends State<TodoPage> {
                 }
 
                 return GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TodoDetailsPage(todo: todo),
+                    ),
+                  ),
                   onLongPress: () {
                     // Enter multi-select mode
                     setState(() {

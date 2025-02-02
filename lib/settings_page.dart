@@ -36,13 +36,6 @@ class _SetingsPageState extends State<SetingsPage> {
           listener: (context, accountState) {
             if (accountState.errorMsg != null) {
               ErrorMessageWidget.showError(context, accountState.errorMsg!);
-            } else if (accountState.isSuccess) {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => const SignInPage(),
-              //   ),
-              // );
             } else if (accountState.isSignOut) {
               ErrorMessageWidget.showError(context, 'Sign out successful');
             }

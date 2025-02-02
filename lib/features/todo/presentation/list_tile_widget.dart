@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 // import '../../../common_widget/button_widget.dart';
 import '../../../common_widget/icon_widget.dart';
 // import '../../../common_widget/text_form_field_widget.dart';
+import '../../../common_widget/text_small_widget.dart';
 import '../../../common_widget/text_widget.dart';
 import '../domain/models/todo.dart';
 import 'todo_cubit.dart';
 import 'update_todo_page.dart';
 
 class ListTileWidget extends StatefulWidget {
-  final String? title, desc;
+  final String? title, desc, createdAt;
   final Todo todoList;
   final bool isTrailingVisible;
   bool isChecked = false;
@@ -23,6 +25,7 @@ class ListTileWidget extends StatefulWidget {
     super.key,
     this.title,
     this.desc,
+    this.createdAt,
     required this.todoList,
     this.isTrailingVisible = true,
     this.isChecked = false,
@@ -190,9 +193,27 @@ class _ListTileWidgetState extends State<ListTileWidget>
           ),
           // Keep your existing "isCompleted" logic
           child: ListTile(
-            title: TextWidget(text: widget.todoList.title),
-            subtitle: TextWidget(
-              text: widget.todoList.description ?? '',
+            title: TextWidget(
+              text: widget.todoList.title,
+              maxLine: 1,
+            ),
+
+            subtitle: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              children: [
+                TextSmallWidget(
+                  text: widget.todoList.description ?? '',
+                  maxLine: 1,
+                ),
+                TextSmallWidget(
+                  text: widget.todoList.createdAt != null
+                      ? DateFormat('MMMM dd, yyyy').format(
+                          widget.todoList.createdAt,
+                        )
+                      : '',
+                  maxLine: 1,
+                ),
+              ],
             ),
 
             // ----------------- MULTI-SELECTION OR COMPLETION CHECKBOX -----------------
