@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
+import 'features/stats/presentation/stats_page.dart';
 import 'features/todo/domain/repository/todo_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_page.dart';
-import 'features/todo/presentation/statistics_page.dart';
 import 'features/todo/presentation/todo_page.dart';
 import 'settings_page.dart';
 
@@ -33,7 +33,7 @@ class _MainPageState extends State<MainPage> {
         todoRepo: widget.todoRepo,
       ),
       const PomodoroPage(),
-      const StatisticsPage(),
+      const StatsPage(),
       const SetingsPage(),
     ];
   }

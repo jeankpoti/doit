@@ -15,7 +15,6 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'features/account/data/repository/account_repo.dart';
-import 'features/account/domain/repository/account_repo.dart';
 import 'features/account/presentation/account_cubit.dart';
 import 'features/pomodoro/data/repository/pomodoro_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_cubit.dart';
