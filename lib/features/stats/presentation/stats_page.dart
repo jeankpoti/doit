@@ -37,6 +37,7 @@ class StatsPage extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
+            
             Text(
               'Daily Completed Tasks',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

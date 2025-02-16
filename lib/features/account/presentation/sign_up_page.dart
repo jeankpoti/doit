@@ -51,7 +51,6 @@ class _SignUpPageState extends State<SignUpPage> {
         context,
       );
 
-      // Optionally clear the fields
       _fullNameController.clear();
       _emailController.clear();
       _passwordController.clear();

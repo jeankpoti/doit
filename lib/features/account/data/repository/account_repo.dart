@@ -440,4 +440,52 @@ class FirebaseRepo implements AccountRepo {
       );
     }
   }
+
+  @override
+  Future<void> deleteUserWithHisData(context) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Delete data from all collections
+        final collections = ['todos', 'users'];
+
+        for (String collection in collections) {
+          final querySnapshot = await FirebaseFirestore.instance
+              .collection(collection)
+              .where('userId', isEqualTo: user.uid)
+              .get();
+
+          for (var doc in querySnapshot.docs) {
+            await doc.reference.delete();
+          }
+        }
+
+        // Explicitly delete the user document from Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .delete();
+
+        // Finally delete the authentication account
+        await user.delete();
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        if (context.mounted) {
+          ErrorMessageWidget.showError(
+            context,
+            "Please sign out and sign in again to delete your account.",
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ErrorMessageWidget.showError(
+          context,
+          'Error deleting account. Please try again.',
+        );
+      }
+    }
+  }
 }

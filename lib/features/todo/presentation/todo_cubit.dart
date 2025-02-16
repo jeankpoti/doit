@@ -22,7 +22,9 @@ class TodoCubit extends Cubit<TodoState> {
     emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
       final completedTodos = await todoRepo.getCompletedTodos();
-      emit(state.copyWith(todos: completedTodos, isLoading: false));
+
+      print('Completed Todos: $completedTodos');
+      emit(state.copyWith(completedTodos: completedTodos, isLoading: false));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
     }
@@ -75,6 +77,25 @@ class TodoCubit extends Cubit<TodoState> {
 
       final updatedTodos = await todoRepo.getTodos();
       emit(state.copyWith(todos: updatedTodos, isLoading: false));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  Future<void> toggleComletedTodoStatus(Todo todo) async {
+    emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      final updatedTodo = todo.toggleCompletion();
+      await todoRepo.toggleTodoStatus(updatedTodo);
+
+      final completedTodos = await todoRepo.getCompletedTodos();
+      final unCompletedTodos = await todoRepo.getTodos();
+
+      emit(state.copyWith(
+        completedTodos: completedTodos,
+        todos: unCompletedTodos,
+        isLoading: false,
+      ));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
     }

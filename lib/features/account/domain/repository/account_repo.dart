@@ -24,6 +24,7 @@ abstract class AccountRepo {
   Future<void> signUpWithApple(context);
   Future<void> signOut();
   Future<void> resetPassword(context, String email);
+  Future<void> deleteUserWithHisData(context);
 }
 
 /*

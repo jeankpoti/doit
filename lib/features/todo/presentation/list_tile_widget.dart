@@ -226,7 +226,7 @@ class _ListTileWidgetState extends State<ListTileWidget>
                 : Checkbox(
                     value: widget.todoList.isCompleted,
                     onChanged: (value) =>
-                        todoCubit.toggleTodoStatus(widget.todoList),
+                        todoCubit.toggleComletedTodoStatus(widget.todoList),
                   ),
 
             trailing: widget.isCompleted

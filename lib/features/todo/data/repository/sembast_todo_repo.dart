@@ -22,17 +22,23 @@ class SembastTodoRepo {
       db,
       finder: Finder(
         sortOrders: [SortOrder('createdAt', false)], // false means descending
+        filter: Filter.equals('isCompleted', false),
       ),
     );
-    return records
-        .map((record) => Todo.fromJson({
-              'id': record.key,
-              ...record.value,
-            }))
-        .toList();
+    return records.map((snapshot) {
+      final todo = Todo.fromJson(snapshot.value);
+      return todo;
+    }).toList();
+    // return records
+    //     .map((record) => Todo.fromJson({
+    //           'id': record.key,
+    //           ...record.value,
+    //         }))
+    //     .toList();
   }
 
   Future<List<Todo>> getCompletedTodos() async {
+    print('Called getCompletedTodos');
     final records = await _todoStore.find(
       db,
       finder: Finder(
@@ -49,6 +55,11 @@ class SembastTodoRepo {
 
   // In SembastTodoRepo
   Future<void> addTodo(Todo newTodo) async {
+    final record = _todoStore.record(newTodo.id);
+    final exists = await record.exists(db);
+    print('addTodo: $exists');
+    if (exists) return;
+
     final todoJson = newTodo.toJson();
     todoJson['createdAt'] =
         DateTime.now().toIso8601String(); // Ensure creation time is set
@@ -87,6 +98,7 @@ class SembastTodoRepo {
         'updatedAt': DateTime.now().toIso8601String(),
       };
       await record.put(db, updatedTodo);
+      print('Successfully updated todo: $updatedTodo');
     } catch (e) {
       rethrow;
     }

@@ -1,4 +1,4 @@
-package com.jeankpoti.doit
+package com.jeankpoti.worksnap
 
 import io.flutter.embedding.android.FlutterActivity
 

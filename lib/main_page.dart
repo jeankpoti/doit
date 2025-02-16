@@ -33,7 +33,7 @@ class _MainPageState extends State<MainPage> {
         todoRepo: widget.todoRepo,
       ),
       const PomodoroPage(),
-      const StatsPage(),
+      // const StatsPage(),
       const SetingsPage(),
     ];
   }
@@ -58,15 +58,15 @@ class _MainPageState extends State<MainPage> {
         activeColorPrimary: Theme.of(context).colorScheme.primary,
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
-      PersistentBottomNavBarItem(
-        icon: const FaIcon(
-          FontAwesomeIcons.chartBar,
-          size: 20,
-        ),
-        title: 'Statistics',
-        activeColorPrimary: Theme.of(context).colorScheme.primary,
-        inactiveColorPrimary: CupertinoColors.systemGrey,
-      ),
+      // PersistentBottomNavBarItem(
+      //   icon: const FaIcon(
+      //     FontAwesomeIcons.chartBar,
+      //     size: 20,
+      //   ),
+      //   title: 'Statistics',
+      //   activeColorPrimary: Theme.of(context).colorScheme.primary,
+      //   inactiveColorPrimary: CupertinoColors.systemGrey,
+      // ),
       PersistentBottomNavBarItem(
         icon: const FaIcon(
           FontAwesomeIcons.gear,

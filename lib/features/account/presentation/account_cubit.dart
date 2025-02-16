@@ -146,6 +146,10 @@ class AccountCubit extends Cubit<AccountState> {
     }
   }
 
+  void resetSignOut() {
+    emit(state.copyWith(isSignOut: false));
+  }
+
   // signUpWithGoogle
   Future<void> signUpWithGoogle(context) async {
     try {
@@ -195,6 +199,25 @@ class AccountCubit extends Cubit<AccountState> {
       emit(state.copyWith(isLoading: true));
 
       await accountRepo.resetPassword(context, email);
+
+      //  On success -> isLoading: false, no error message
+      emit(state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        errorMsg: null,
+      ));
+    } catch (e) {
+      // On error -> isLoading: false, error message
+      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  Future<void> deleteUserWithHisData(context) async {
+    try {
+      //Show loading
+      emit(state.copyWith(isLoading: true));
+
+      await accountRepo.deleteUserWithHisData(context);
 
       //  On success -> isLoading: false, no error message
       emit(state.copyWith(

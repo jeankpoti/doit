@@ -1,4 +1,5 @@
 import 'package:do_it/common_widget/loader_widget.dart';
+import 'package:do_it/common_widget/text_widget.dart';
 import 'package:do_it/theme/theme_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,8 @@ class _SetingsPageState extends State<SetingsPage> {
               ErrorMessageWidget.showError(context, accountState.errorMsg!);
             } else if (accountState.isSignOut) {
               ErrorMessageWidget.showError(context, 'Sign out successful');
+              // Reset isSignOut state
+              context.read<AccountCubit>().resetSignOut();
             }
           },
           child: BlocBuilder<AccountCubit, AccountState>(
@@ -108,19 +111,143 @@ class _SetingsPageState extends State<SetingsPage> {
                           await accountCubit.signOut();
                         },
                       ),
-                    SettingsListTile(
-                      text: 'Reset Password',
-                      icon: Icon(
-                        Icons.logout,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ResetPasswordpage(),
+                    if (user != null)
+                      ExpansionTile(
+                        title: const TextWidget(
+                          text: 'Account Settings',
                         ),
+                        children: [
+                          ListTile(
+                            leading: Icon(
+                              Icons.person,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            title: const TextWidget(
+                              text: 'Delete Account',
+                            ),
+                            onTap: () async {
+                              String confirmText = '';
+
+                              final bool? confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.surface,
+                                    title: const TextWidget(
+                                      text: 'Delete Account',
+                                    ),
+                                    content: Column(
+                                      spacing: 16,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const TextWidget(
+                                          text:
+                                              'This action cannot be undone. All your data will be deleted.  Please type "DELETE" to confirm.',
+                                        ),
+                                        TextField(
+                                          onChanged: (value) =>
+                                              confirmText = value,
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                          cursorColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          decoration: InputDecoration(
+                                            hintText: 'Type DELETE',
+                                            fillColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            labelStyle: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                            ),
+                                            focusColor: Colors.white,
+                                            hintStyle: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium!,
+                                            enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                              ),
+                                            ),
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: Text(
+                                          'Cancel',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!,
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          if (confirmText == 'DELETE') {
+                                            Navigator.pop(context, true);
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Please type DELETE to confirm'),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Text(
+                                          'Delete Account',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+
+                              if (confirm == true && context.mounted) {
+                                final accountCubit =
+                                    context.read<AccountCubit>();
+                                await accountCubit
+                                    .deleteUserWithHisData(context);
+                              }
+                            },
+                          ),
+                          SettingsListTile(
+                            text: 'Reset Password',
+                            icon: Icon(
+                              Icons.logout,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ResetPasswordpage(),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
                   ],
                 ),
               );

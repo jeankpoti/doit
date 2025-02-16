@@ -133,7 +133,15 @@ class HybridTodoRepo implements TodoRepo {
     final pendingUpdates = localTodos.where((t) => t.needsSync).toList();
 
     for (final todo in pendingUpdates) {
-      await remoteRepo.addOrUpdateTodo(todo);
+      final syncedTodoToLocal = todo.copyWith(
+        id: todo.id,
+        title: todo.title,
+        description: todo.description,
+        isCompleted: todo.isCompleted,
+        needsSync: false,
+        pendingDelete: todo.pendingDelete,
+      );
+      await remoteRepo.addOrUpdateTodo(syncedTodoToLocal);
     }
     // Then mark them synced locally
     for (final todo in pendingUpdates) {
@@ -141,7 +149,9 @@ class HybridTodoRepo implements TodoRepo {
         id: todo.id,
         title: todo.title,
         description: todo.description,
+        isCompleted: todo.isCompleted,
         needsSync: false,
+        pendingDelete: todo.pendingDelete,
       );
       await localRepo.updateTodo(syncedTodo);
     }

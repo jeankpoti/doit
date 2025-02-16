@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
@@ -13,6 +13,7 @@ import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'features/account/data/repository/account_repo.dart';
 import 'features/account/presentation/account_cubit.dart';
@@ -37,6 +38,7 @@ void main() async {
     options:
         DefaultFirebaseOptions.currentPlatform, // If using the FlutterFire CLI
   );
+
   final firestore = FirebaseFirestore.instance;
 
   final prefs = await SharedPreferences.getInstance();
@@ -46,7 +48,9 @@ void main() async {
   tz.initializeTimeZones();
 
   // Get the current time zone name
-  final String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
+  final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+
+  // FlutterNativeTimezone.getLocalTimezone();
 
   // Optionally set local location:
   tz.setLocalLocation(tz.getLocation(timeZoneName));
@@ -75,8 +79,16 @@ void main() async {
     },
   );
 
-  // get the application documents directory
-  final dir = await getApplicationDocumentsDirectory();
+  dynamic dir;
+
+  // Register path_provider_web for web support
+  if (kIsWeb) {
+    // PathProviderPlatform.instance = PathProviderWeb();
+  } else {
+    // get the application documents directory
+    dir = await getApplicationDocumentsDirectory();
+  }
+
 // make sure it exists
   await dir.create(recursive: true);
 // build the database path
@@ -85,7 +97,7 @@ void main() async {
   final db = await databaseFactoryIo.openDatabase(dbPath);
 
   //initialize repo with isar database
-  final isarTodoRepo = SembastTodoRepo(db);
+  // final isarTodoRepo = SembastTodoRepo(db);
 
   final pomodoroRepo = IsarPomodoroRepo();
 
