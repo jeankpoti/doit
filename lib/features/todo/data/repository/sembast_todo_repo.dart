@@ -29,16 +29,9 @@ class SembastTodoRepo {
       final todo = Todo.fromJson(snapshot.value);
       return todo;
     }).toList();
-    // return records
-    //     .map((record) => Todo.fromJson({
-    //           'id': record.key,
-    //           ...record.value,
-    //         }))
-    //     .toList();
   }
 
   Future<List<Todo>> getCompletedTodos() async {
-    print('Called getCompletedTodos');
     final records = await _todoStore.find(
       db,
       finder: Finder(
@@ -57,7 +50,6 @@ class SembastTodoRepo {
   Future<void> addTodo(Todo newTodo) async {
     final record = _todoStore.record(newTodo.id);
     final exists = await record.exists(db);
-    print('addTodo: $exists');
     if (exists) return;
 
     final todoJson = newTodo.toJson();
@@ -96,9 +88,12 @@ class SembastTodoRepo {
         'createdAt': existingTodo?['createdAt'] ??
             DateTime.now().toIso8601String(), // Preserve original creation time
         'updatedAt': DateTime.now().toIso8601String(),
+        'completedAt': todo.isCompleted
+            ? DateTime.now().toIso8601String()
+            : null, // Set completion time if completed
       };
+
       await record.put(db, updatedTodo);
-      print('Successfully updated todo: $updatedTodo');
     } catch (e) {
       rethrow;
     }

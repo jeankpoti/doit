@@ -88,7 +88,6 @@ class _TodoPageState extends State<TodoPage> {
             // 4) Show the todos list
             final todos = state.todos;
 
-            print('Todos: ${todos.length}');
             return ListView.builder(
               itemCount: todos.length,
               itemBuilder: (context, index) {

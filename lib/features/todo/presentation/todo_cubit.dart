@@ -23,7 +23,6 @@ class TodoCubit extends Cubit<TodoState> {
     try {
       final completedTodos = await todoRepo.getCompletedTodos();
 
-      print('Completed Todos: $completedTodos');
       emit(state.copyWith(completedTodos: completedTodos, isLoading: false));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
@@ -100,6 +99,132 @@ class TodoCubit extends Cubit<TodoState> {
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
     }
   }
+
+  Future<void> dailyCompletedTasksData() async {
+    emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      final completedTodos = await todoRepo.getCompletedTodos();
+
+      // Group completed todos by day
+      final Map<String, int> dailyCompletedTasks = {};
+      for (var todo in completedTodos) {
+        if (todo.completedAt != null) {
+          final date = todo.completedAt!.toIso8601String().split('T').first;
+          if (dailyCompletedTasks.containsKey(date)) {
+            dailyCompletedTasks[date] = dailyCompletedTasks[date]! + 1;
+          } else {
+            dailyCompletedTasks[date] = 1;
+          }
+        }
+      }
+
+      // Convert the map to a list of counts
+      final dailyCompletedTasksData = dailyCompletedTasks.values.toList();
+
+      emit(state.copyWith(
+        dailyCompletedTasksData: dailyCompletedTasksData,
+        isLoading: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  Future<void> weeklyCompletedTasksData() async {
+    emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      final completedTodos = await todoRepo.getCompletedTodos();
+
+      // Group completed todos by week
+      final Map<String, int> weeklyCompletedTasks = {};
+      for (var todo in completedTodos) {
+        if (todo.completedAt != null) {
+          final week = _getWeekOfYear(todo.completedAt!);
+          if (weeklyCompletedTasks.containsKey(week)) {
+            weeklyCompletedTasks[week] = weeklyCompletedTasks[week]! + 1;
+          } else {
+            weeklyCompletedTasks[week] = 1;
+          }
+        }
+      }
+
+      // Convert the map to a list of counts
+      final weeklyCompletedTasksData = weeklyCompletedTasks.values.toList();
+
+      emit(state.copyWith(
+        weeklyCompletedTasksData: weeklyCompletedTasksData,
+        isLoading: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  Future<void> monthlyCompletedTasksData() async {
+    emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      final completedTodos = await todoRepo.getCompletedTodos();
+
+      // Group completed todos by month
+      final Map<String, int> monthlyCompletedTasks = {};
+      for (var todo in completedTodos) {
+        if (todo.completedAt != null) {
+          final month = '${todo.completedAt!.year}-${todo.completedAt!.month}';
+          if (monthlyCompletedTasks.containsKey(month)) {
+            monthlyCompletedTasks[month] = monthlyCompletedTasks[month]! + 1;
+          } else {
+            monthlyCompletedTasks[month] = 1;
+          }
+        }
+      }
+
+      // Convert the map to a list of counts
+      final monthlyCompletedTasksData = monthlyCompletedTasks.values.toList();
+
+      emit(state.copyWith(
+        monthlyCompletedTasksData: monthlyCompletedTasksData,
+        isLoading: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  Future<void> lifetimeCompletedTasksData() async {
+    emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      final completedTodos = await todoRepo.getCompletedTodos();
+
+      // Group completed todos by year
+      final Map<String, int> lifetimeCompletedTasks = {};
+      for (var todo in completedTodos) {
+        if (todo.completedAt != null) {
+          final year = todo.completedAt!.year.toString();
+          if (lifetimeCompletedTasks.containsKey(year)) {
+            lifetimeCompletedTasks[year] = lifetimeCompletedTasks[year]! + 1;
+          } else {
+            lifetimeCompletedTasks[year] = 1;
+          }
+        }
+      }
+
+      // Convert the map to a list of counts
+      final lifetimeCompletedTasksData = lifetimeCompletedTasks.values.toList();
+
+      emit(state.copyWith(
+        lifetimeCompletedTasksData: lifetimeCompletedTasksData,
+        isLoading: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  String _getWeekOfYear(DateTime date) {
+    final firstDayOfYear = DateTime(date.year, 1, 1);
+    final daysSinceFirstDay = date.difference(firstDayOfYear).inDays;
+    return ((daysSinceFirstDay / 7).ceil()).toString();
+  }
 }
 
 // /*
@@ -107,97 +232,3 @@ class TodoCubit extends Cubit<TodoState> {
 
 //  Each cubit is a list of todos
 // */
-
-// import 'package:flutter_bloc/flutter_bloc.dart';
-
-// // import '../data/models/isar_todo.dart';
-// import '../domain/models/todo.dart';
-// import '../domain/repository/todo_repo.dart';
-
-// class TodoCubit extends Cubit<List<Todo>> {
-//   // Refernce  todo repo
-//   final TodoRepo todoRepo;
-
-//   // Constructor initializes the cubit with an empty list
-//   TodoCubit(this.todoRepo) : super([]) {
-//     // Load todos from the repo
-//     loadTodos();
-//   }
-
-//   // Load todos from the repo
-//   Future<void> loadTodos() async {
-//     // Get todos from the repo
-//     final todos = await todoRepo.getTodos();
-
-//     // Emit the fecthed todos as the new state
-//     emit(todos);
-//   }
-
-//   // Load todos from the repo
-//   Future<void> loadCompletedTodos() async {
-//     // Get todos from the repo
-//     final completedTodos = await todoRepo.getCompletedTodos();
-
-//     // Emit the fecthed todos as the new state
-//     emit(completedTodos);
-//   }
-
-//   // Add a new todo
-//   Future<void> addTodo(String title, description) async {
-//     final newTodo = Todo(
-//       id: DateTime.now().millisecondsSinceEpoch,
-//       title: title,
-//       description: description,
-//     );
-
-//     // Add the todo to the repo
-//     await todoRepo.addTodo(newTodo);
-
-//     // // Re-load
-//     // loadTodos();
-
-//     // Get updated list
-//     final updatedTodos = await todoRepo.getTodos();
-
-//     // Emit new state immediately
-//     emit(updatedTodos);
-//   }
-
-//   // Update a todo
-//   // Future<void> updateTodo(TodoIsar todo) async {
-//   //   // Update the todo in the repo
-//   //   await todoRepo.updateTodo(todo);
-
-//   //   // Re-load todos
-//   //   loadTodos();
-//   // }
-
-//   Future<void> updateTodo(Todo todo) async {
-//     // Update the todo in the repo
-//     await todoRepo.updateTodo(todo);
-
-//     // Re-load todos
-//     loadTodos();
-//   }
-
-//   // Delete a todo
-//   Future<void> deleteTodo(Todo todo) async {
-//     // Delete the todo from the repo
-//     await todoRepo.deleteTodo(todo);
-
-//     // Re-load todos
-//     loadTodos();
-//   }
-
-//   // Toggle the completion status of a todo
-//   Future<void> toggleTodoStatus(Todo todo) async {
-//     // Toggle the completion status of the todo
-//     final updatedTodo = todo.toggleCompletion();
-
-//     // Update the todo in the repo
-//     await todoRepo.toggleTodoStatus(updatedTodo);
-
-//     // Re-load todos
-//     loadTodos();
-//   }
-// }

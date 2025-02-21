@@ -141,6 +141,10 @@ class FirebaseTodoRepo {
       // Update only the isCompleted property on the Firestore document.
       await _collection.doc(todo.id.toString()).update({
         'isCompleted': todo.isCompleted,
+        'updatedAt': DateTime.now().toIso8601String(),
+        'completedAt': todo.isCompleted
+            ? DateTime.now().toIso8601String()
+            : null, // Set completion time if completed
       });
     } catch (e) {
       rethrow;

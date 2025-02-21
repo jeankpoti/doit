@@ -9,6 +9,7 @@ class Todo extends Equatable {
   final bool pendingDelete;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final DateTime? completedAt;
 
   Todo({
     required this.id,
@@ -19,8 +20,10 @@ class Todo extends Equatable {
     this.pendingDelete = false,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? completedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+        updatedAt = updatedAt ?? DateTime.now(),
+        completedAt = completedAt ?? DateTime.now();
 
   // For local or remote serialization
   factory Todo.fromJson(Map<String, dynamic> json) {
@@ -37,6 +40,9 @@ class Todo extends Equatable {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : null,
+      completedAt: json['completedAt'] != null
+          ? DateTime.parse(json['completedAt'] as String)
+          : null,
     );
   }
 
@@ -50,6 +56,7 @@ class Todo extends Equatable {
       'pendingDelete': pendingDelete,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'completedAt': null,
     };
   }
 
@@ -63,7 +70,7 @@ class Todo extends Equatable {
     bool? pendingDelete,
     DateTime? createdAt,
     DateTime? updatedAt,
-    // DateTime? lastModified,
+    DateTime? completedAt,
   }) {
     return Todo(
       id: id ?? this.id,
@@ -74,6 +81,7 @@ class Todo extends Equatable {
       pendingDelete: pendingDelete ?? this.pendingDelete,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      completedAt: completedAt,
     );
   }
 
@@ -87,6 +95,7 @@ class Todo extends Equatable {
       pendingDelete: pendingDelete,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      completedAt: isCompleted ? DateTime.now() : null,
     );
   }
 
@@ -100,5 +109,6 @@ class Todo extends Equatable {
         pendingDelete,
         createdAt,
         updatedAt,
+        completedAt,
       ];
 }
