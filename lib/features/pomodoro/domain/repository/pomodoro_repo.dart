@@ -4,6 +4,8 @@ TodoRepo is an abstract class that defines the methods that the TodoRepository c
 Here we define what the app can do
 */
 
+import '../models/pomodoro.dart';
+
 abstract class PomodoroRepo {
   Future<void> saveSettings(
     int workDuration,
@@ -11,6 +13,10 @@ abstract class PomodoroRepo {
     int longBreakDuration,
     int sessionCount,
   );
+
+  Future<List<Pomodoro>> getSessions();
+
+  Future<void> saveSession(Pomodoro pomodoro);
 }
 
 /*

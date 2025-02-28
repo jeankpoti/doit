@@ -17,7 +17,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'features/account/data/repository/account_repo.dart';
 import 'features/account/presentation/account_cubit.dart';
-import 'features/pomodoro/data/repository/pomodoro_repo.dart';
+import 'features/pomodoro/data/repository/firebase_pomodoro_repo.dart';
+import 'features/pomodoro/data/repository/hybrid_pomodoro_repo.dart';
+import 'features/pomodoro/data/repository/local_pomodoro_repo.dart';
 import 'features/pomodoro/presentation/pomodoro_cubit.dart';
 import 'features/todo/data/repository/firebase_todo_repo.dart';
 import 'features/todo/data/repository/hybrid_todo_repo.dart';
@@ -99,7 +101,10 @@ void main() async {
   //initialize repo with isar database
   // final isarTodoRepo = SembastTodoRepo(db);
 
-  final pomodoroRepo = IsarPomodoroRepo();
+  final localPomodoroRepo = LocalPomodoroRepo(db);
+  final remotePomodoroRepo = FirebasePomodoroRepo(firestore);
+  final hybridPomodoroRepo = HybridPomodoroRepo(
+      localRepo: localPomodoroRepo, remoteRepo: remotePomodoroRepo);
 
   final accountRepo = FirebaseRepo();
 
@@ -132,7 +137,7 @@ void main() async {
         create: (context) => ThemeCubit(isDarkMode),
       ), // Ensure this is added
       BlocProvider<PomodoroCubit>(
-        create: (context) => PomodoroCubit(pomodoroRepo),
+        create: (context) => PomodoroCubit(hybridPomodoroRepo),
       ),
       BlocProvider<AccountCubit>(
         create: (context) => AccountCubit(accountRepo, hybridTodoRepo),

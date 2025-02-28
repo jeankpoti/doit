@@ -20,8 +20,17 @@ class _PomodoroPageState extends State<PomodoroPage>
   @override
   void initState() {
     super.initState();
-    context.read<PomodoroCubit>().loadSettings();
+
+    getData();
+    // context.read<PomodoroCubit>().loadSettings();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  Future<void> getData() async {
+    await Future.wait([
+      context.read<PomodoroCubit>().loadSettings(),
+      context.read<PomodoroCubit>().dailySessionsData(),
+    ]);
   }
 
   @override

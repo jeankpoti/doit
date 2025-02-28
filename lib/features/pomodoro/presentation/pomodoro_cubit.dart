@@ -2,12 +2,11 @@
 
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_background/flutter_background.dart';
+import 'package:do_it/features/pomodoro/domain/models/pomodoro.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibration/vibration.dart';
-import 'dart:io' show Platform;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../../main.dart';
@@ -25,7 +24,13 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
       : _remainingTime = 25 * 60,
         super(
           (const PomodoroConfigState(
+            sessions: [],
+            dailySessionsData: [],
+            weeklySessionsData: [],
+            monthlySessionsData: [],
+            lifeTimeSessionsData: [],
             completedSessions: 0,
+            completedSessionsPersist: 0,
             sessionCount: 4,
             workDuration: 25 * 60,
             shortBreakDuration: 5 * 60,
@@ -94,6 +99,8 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
           // Work session completed - notify user
           // Play sound and vibrate for focus end
           notifyCompletion('sounds/clock-alarm.mp3');
+          // Save completed sessions to storage
+          saveSession();
           emit(state.copyWith(
             isRunning: false,
             isBreak: true,
@@ -171,6 +178,8 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
           } else {
             // Work session completed - notify user
             notifyCompletion('sounds/clock-alarm.mp3');
+            // Save completed sessions to storage
+            saveSession();
             emit(state.copyWith(
               isRunning: false,
               isBreak: true,
@@ -353,5 +362,238 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
     _timer?.cancel();
     _audioPlayer.dispose();
     return super.close();
+  }
+
+  Future<void> getSessions() async {
+    // emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      final sessions = await pomodoroRepo.getSessions();
+      emit(state.copyWith(sessions: sessions));
+    } catch (e) {
+      // emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  Future<void> saveSession() async {
+    // emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      final newPomodoro = Pomodoro(
+        id: DateTime.now().millisecondsSinceEpoch,
+        completedSessionsPersist: 1,
+      );
+
+      await pomodoroRepo.saveSession(newPomodoro);
+      // emit(state.copyWith(todos: updatedTodos, isLoading: false));
+    } catch (e) {
+      // emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
+  Future<void> dailySessionsData() async {
+    try {
+      final sessions = await pomodoroRepo.getSessions();
+      final now = DateTime.now().toLocal();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // Group sessions by normalized date.
+      Map<DateTime, int> sessionCounts = {};
+      for (var session in sessions) {
+        // Normalize using local time.
+        final date = DateTime(session.createdAt.toLocal().year,
+            session.createdAt.toLocal().month, session.createdAt.toLocal().day);
+        sessionCounts[date] = (sessionCounts[date] ?? 0) +
+            (session.completedSessionsPersist ?? 0);
+      }
+
+      // Create aggregated sessions for the last 7 days.
+      List<Pomodoro> dailySessionsList = [];
+      for (int i = 6; i >= 0; i--) {
+        final day = today.subtract(Duration(days: i));
+        final count = sessionCounts[day] ?? 0;
+        dailySessionsList.add(
+          Pomodoro(
+            id: day.millisecondsSinceEpoch,
+            completedSessionsPersist: count,
+            // isCompleted: false, // Adjust if needed.
+            createdAt: day,
+            updatedAt: day,
+          ),
+        );
+      }
+
+      emit(state.copyWith(dailySessionsData: dailySessionsList));
+    } catch (e) {
+      // Handle errors.
+    }
+  }
+
+  Future<void> weeklySessionsData() async {
+    try {
+      final sessions = await pomodoroRepo.getSessions();
+      final now = DateTime.now().toLocal();
+
+      // Get the start of the current week (considering Sunday as the first day of the week)
+      final currentWeekStart = DateTime(now.year, now.month, now.day)
+          .subtract(Duration(days: now.weekday % 7));
+
+      // Group sessions by week
+      Map<DateTime, int> weeklySessionCounts = {};
+
+      // Process data for the last 7 weeks
+      for (int i = 6; i >= 0; i--) {
+        // Calculate the start date of this week
+        final weekStart = currentWeekStart.subtract(Duration(days: i * 7));
+        // Initialize this week with zero sessions
+        weeklySessionCounts[weekStart] = 0;
+      }
+
+      // Aggregate session counts by week
+      for (var session in sessions) {
+        final sessionDate = session.createdAt.toLocal();
+
+        // Find which week this session belongs to
+        for (var weekStart in weeklySessionCounts.keys) {
+          final weekEnd = weekStart.add(
+              const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+
+          if (sessionDate.isAfter(weekStart) && sessionDate.isBefore(weekEnd)) {
+            weeklySessionCounts[weekStart] = weeklySessionCounts[weekStart]! +
+                (session.completedSessionsPersist ?? 0);
+            break;
+          }
+        }
+      }
+
+      // Convert map to list in chronological order
+      List<int> weeklyData = [];
+      List<DateTime> sortedWeeks = weeklySessionCounts.keys.toList()
+        ..sort((a, b) => a.compareTo(b));
+
+      for (var weekStart in sortedWeeks) {
+        weeklyData.add(weeklySessionCounts[weekStart] ?? 0);
+      }
+
+      emit(state.copyWith(weeklySessionsData: weeklyData));
+    } catch (e) {
+      // Handle errors appropriately
+      print('Error in weeklySessionsData: $e');
+    }
+  }
+
+  Future<void> monthlySessionsData() async {
+    try {
+      final sessions = await pomodoroRepo.getSessions();
+      final now = DateTime.now().toLocal();
+
+      // Create a map to store session counts by month
+      Map<DateTime, int> monthlySessionCounts = {};
+
+      // Initialize the last 7 months with zero sessions
+      for (int i = 6; i >= 0; i--) {
+        // Get the first day of each month going back 7 months
+        final year = now.month - i <= 0 ? now.year - 1 : now.year;
+        final month = now.month - i <= 0 ? now.month - i + 12 : now.month - i;
+        final monthStart = DateTime(year, month, 1);
+
+        // Initialize with zero counts
+        monthlySessionCounts[monthStart] = 0;
+      }
+
+      // Aggregate session counts by month
+      for (var session in sessions) {
+        final sessionDate = session.createdAt.toLocal();
+        final sessionMonthStart =
+            DateTime(sessionDate.year, sessionDate.month, 1);
+
+        // Only count sessions from the last 7 months
+        if (monthlySessionCounts.containsKey(sessionMonthStart)) {
+          monthlySessionCounts[sessionMonthStart] =
+              monthlySessionCounts[sessionMonthStart]! +
+                  (session.completedSessionsPersist ?? 0);
+        }
+      }
+
+      // Convert map to list in chronological order
+      List<int> monthlyData = [];
+      List<DateTime> sortedMonths = monthlySessionCounts.keys.toList()
+        ..sort((a, b) => a.compareTo(b));
+
+      for (var monthStart in sortedMonths) {
+        monthlyData.add(monthlySessionCounts[monthStart] ?? 0);
+      }
+
+      emit(state.copyWith(monthlySessionsData: monthlyData));
+    } catch (e) {
+      // Handle errors appropriately
+      // print('Error in monthlySessionsData: $e');
+    }
+  }
+
+  Future<void> lifetimeSessionsData() async {
+    try {
+      final sessions = await pomodoroRepo.getSessions();
+
+      // First, find the earliest and latest session dates
+      DateTime? earliestDate;
+      DateTime latestDate = DateTime.now().toLocal();
+
+      if (sessions.isEmpty) {
+        // If no sessions, just create a simple timeline from now to 6 months ago
+        earliestDate = latestDate.subtract(const Duration(days: 180));
+      } else {
+        // Find the earliest session date
+        earliestDate = sessions.map((s) => s.createdAt.toLocal()).reduce(
+            (value, element) => value.isBefore(element) ? value : element);
+
+        // Ensure we have at least 6 months of history
+        final sixMonthsAgo = latestDate.subtract(const Duration(days: 180));
+        if (earliestDate.isAfter(sixMonthsAgo)) {
+          earliestDate = sixMonthsAgo;
+        }
+      }
+
+      // Calculate the total time span in months (rounded up)
+      final months = (latestDate.year - earliestDate.year) * 12 +
+          latestDate.month -
+          earliestDate.month +
+          (latestDate.day > earliestDate.day ? 1 : 0);
+
+      // Use 7 time periods for the chart (or fewer if we have less history)
+      final periods = months < 7 ? months : 7;
+      final monthsPerPeriod = (months / periods).ceil();
+
+      // Create period boundaries
+      List<DateTime> periodBoundaries = [];
+      for (int i = 0; i <= periods; i++) {
+        // Calculate this period's date
+        final monthsToAdd = i * monthsPerPeriod;
+        final year =
+            earliestDate.year + (earliestDate.month + monthsToAdd - 1) ~/ 12;
+        final month = (earliestDate.month + monthsToAdd - 1) % 12 + 1;
+        periodBoundaries.add(DateTime(year, month, 1));
+      }
+
+      // Initialize period counts
+      List<int> periodSessionCounts = List.filled(periods, 0);
+
+      // Aggregate sessions by period
+      for (var session in sessions) {
+        final sessionDate = session.createdAt.toLocal();
+
+        // Find which period this session belongs to
+        for (int i = 0; i < periods; i++) {
+          if (sessionDate.isAfter(periodBoundaries[i]) &&
+              (i == periods - 1 ||
+                  sessionDate.isBefore(periodBoundaries[i + 1]))) {
+            periodSessionCounts[i] += session.completedSessionsPersist ?? 0;
+            break;
+          }
+        }
+      }
+
+      emit(state.copyWith(lifeTimeSessionsData: periodSessionCounts));
+    } catch (e) {
+      // print('Error in lifetimeSessionsData: $e');
+    }
   }
 }

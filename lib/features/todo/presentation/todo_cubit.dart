@@ -101,28 +101,48 @@ class TodoCubit extends Cubit<TodoState> {
   }
 
   Future<void> dailyCompletedTasksData() async {
-    emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
       final completedTodos = await todoRepo.getCompletedTodos();
+      final now = DateTime.now().toLocal();
+      final today = DateTime(now.year, now.month, now.day);
 
-      // Group completed todos by day
-      final Map<String, int> dailyCompletedTasks = {};
+      // Create a map to store tasks completed each day
+      Map<DateTime, int> dailyTasks = {};
+
+      // Initialize the last 7 days with zero tasks
+      for (int i = 6; i >= 0; i--) {
+        final day = today.subtract(Duration(days: i));
+        dailyTasks[day] = 0;
+      }
+
+      // Count completed tasks for each day
       for (var todo in completedTodos) {
         if (todo.completedAt != null) {
-          final date = todo.completedAt!.toIso8601String().split('T').first;
-          if (dailyCompletedTasks.containsKey(date)) {
-            dailyCompletedTasks[date] = dailyCompletedTasks[date]! + 1;
-          } else {
-            dailyCompletedTasks[date] = 1;
+          // Normalize the date to midnight in local time
+          final completedDate = DateTime(
+            todo.completedAt!.toLocal().year,
+            todo.completedAt!.toLocal().month,
+            todo.completedAt!.toLocal().day,
+          );
+
+          // Only count tasks from the last 7 days
+          final daysSinceCompletion = today.difference(completedDate).inDays;
+          if (daysSinceCompletion >= 0 && daysSinceCompletion < 7) {
+            dailyTasks[completedDate] = (dailyTasks[completedDate] ?? 0) + 1;
           }
         }
       }
 
-      // Convert the map to a list of counts
-      final dailyCompletedTasksData = dailyCompletedTasks.values.toList();
+      // Convert map to ordered list of the last 7 days
+      List<int> dailyTasksData = [];
+      for (int i = 6; i >= 0; i--) {
+        final day = today.subtract(Duration(days: i));
+        dailyTasksData.add(dailyTasks[day] ?? 0);
+      }
 
+      // Emit state with the updated data
       emit(state.copyWith(
-        dailyCompletedTasksData: dailyCompletedTasksData,
+        dailyCompletedTasksData: dailyTasksData,
         isLoading: false,
       ));
     } catch (e) {
@@ -131,28 +151,55 @@ class TodoCubit extends Cubit<TodoState> {
   }
 
   Future<void> weeklyCompletedTasksData() async {
-    emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
       final completedTodos = await todoRepo.getCompletedTodos();
+      final now = DateTime.now().toLocal();
 
-      // Group completed todos by week
-      final Map<String, int> weeklyCompletedTasks = {};
+      // Get the start of the current week (considering Sunday as the first day of the week)
+      final currentWeekStart = DateTime(now.year, now.month, now.day)
+          .subtract(Duration(days: now.weekday % 7));
+
+      // Group tasks by week
+      Map<DateTime, int> weeklyTaskCounts = {};
+
+      // Process data for the last 7 weeks
+      for (int i = 6; i >= 0; i--) {
+        // Calculate the start date of this week
+        final weekStart = currentWeekStart.subtract(Duration(days: i * 7));
+        // Initialize this week with zero tasks
+        weeklyTaskCounts[weekStart] = 0;
+      }
+
+      // Aggregate task counts by week
       for (var todo in completedTodos) {
         if (todo.completedAt != null) {
-          final week = _getWeekOfYear(todo.completedAt!);
-          if (weeklyCompletedTasks.containsKey(week)) {
-            weeklyCompletedTasks[week] = weeklyCompletedTasks[week]! + 1;
-          } else {
-            weeklyCompletedTasks[week] = 1;
+          final completedDate = todo.completedAt!.toLocal();
+
+          // Find which week this task belongs to
+          for (var weekStart in weeklyTaskCounts.keys) {
+            final weekEnd = weekStart.add(
+                const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+
+            if (completedDate.isAfter(weekStart) &&
+                completedDate.isBefore(weekEnd)) {
+              weeklyTaskCounts[weekStart] = weeklyTaskCounts[weekStart]! + 1;
+              break;
+            }
           }
         }
       }
 
-      // Convert the map to a list of counts
-      final weeklyCompletedTasksData = weeklyCompletedTasks.values.toList();
+      // Convert map to list in chronological order
+      List<int> weeklyData = [];
+      List<DateTime> sortedWeeks = weeklyTaskCounts.keys.toList()
+        ..sort((a, b) => a.compareTo(b));
+
+      for (var weekStart in sortedWeeks) {
+        weeklyData.add(weeklyTaskCounts[weekStart] ?? 0);
+      }
 
       emit(state.copyWith(
-        weeklyCompletedTasksData: weeklyCompletedTasksData,
+        weeklyCompletedTasksData: weeklyData,
         isLoading: false,
       ));
     } catch (e) {
@@ -161,28 +208,50 @@ class TodoCubit extends Cubit<TodoState> {
   }
 
   Future<void> monthlyCompletedTasksData() async {
-    emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
       final completedTodos = await todoRepo.getCompletedTodos();
+      final now = DateTime.now().toLocal();
 
-      // Group completed todos by month
-      final Map<String, int> monthlyCompletedTasks = {};
+      // Create a map to store task counts by month
+      Map<DateTime, int> monthlyTaskCounts = {};
+
+      // Initialize the last 7 months with zero tasks
+      for (int i = 6; i >= 0; i--) {
+        // Get the first day of each month going back 7 months
+        final year = now.month - i <= 0 ? now.year - 1 : now.year;
+        final month = now.month - i <= 0 ? now.month - i + 12 : now.month - i;
+        final monthStart = DateTime(year, month, 1);
+
+        // Initialize with zero counts
+        monthlyTaskCounts[monthStart] = 0;
+      }
+
+      // Aggregate task counts by month
       for (var todo in completedTodos) {
         if (todo.completedAt != null) {
-          final month = '${todo.completedAt!.year}-${todo.completedAt!.month}';
-          if (monthlyCompletedTasks.containsKey(month)) {
-            monthlyCompletedTasks[month] = monthlyCompletedTasks[month]! + 1;
-          } else {
-            monthlyCompletedTasks[month] = 1;
+          final completedDate = todo.completedAt!.toLocal();
+          final taskMonthStart =
+              DateTime(completedDate.year, completedDate.month, 1);
+
+          // Only count tasks from the last 7 months
+          if (monthlyTaskCounts.containsKey(taskMonthStart)) {
+            monthlyTaskCounts[taskMonthStart] =
+                monthlyTaskCounts[taskMonthStart]! + 1;
           }
         }
       }
 
-      // Convert the map to a list of counts
-      final monthlyCompletedTasksData = monthlyCompletedTasks.values.toList();
+      // Convert map to list in chronological order
+      List<int> monthlyData = [];
+      List<DateTime> sortedMonths = monthlyTaskCounts.keys.toList()
+        ..sort((a, b) => a.compareTo(b));
+
+      for (var monthStart in sortedMonths) {
+        monthlyData.add(monthlyTaskCounts[monthStart] ?? 0);
+      }
 
       emit(state.copyWith(
-        monthlyCompletedTasksData: monthlyCompletedTasksData,
+        monthlyCompletedTasksData: monthlyData,
         isLoading: false,
       ));
     } catch (e) {
@@ -191,39 +260,79 @@ class TodoCubit extends Cubit<TodoState> {
   }
 
   Future<void> lifetimeCompletedTasksData() async {
-    emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
       final completedTodos = await todoRepo.getCompletedTodos();
 
-      // Group completed todos by year
-      final Map<String, int> lifetimeCompletedTasks = {};
+      // First, find the earliest and latest task completion dates
+      DateTime? earliestDate;
+      DateTime latestDate = DateTime.now().toLocal();
+
+      if (completedTodos.isEmpty) {
+        // If no tasks, just create a simple timeline from now to 6 months ago
+        earliestDate = latestDate.subtract(const Duration(days: 180));
+      } else {
+        // Find the earliest completion date among tasks
+        earliestDate = completedTodos
+            .where((todo) => todo.completedAt != null)
+            .map((todo) => todo.completedAt!.toLocal())
+            .reduce(
+                (value, element) => value.isBefore(element) ? value : element);
+
+        // Ensure we have at least 6 months of history
+        final sixMonthsAgo = latestDate.subtract(const Duration(days: 180));
+        if (earliestDate.isAfter(sixMonthsAgo)) {
+          earliestDate = sixMonthsAgo;
+        }
+      }
+
+      // Calculate the total time span in months (rounded up)
+      final months = (latestDate.year - earliestDate.year) * 12 +
+          latestDate.month -
+          earliestDate.month +
+          (latestDate.day > earliestDate.day ? 1 : 0);
+
+      // Use 7 time periods for the chart (or fewer if we have less history)
+      final periods = months < 7 ? months : 7;
+      final monthsPerPeriod = (months / periods).ceil();
+
+      // Create period boundaries
+      List<DateTime> periodBoundaries = [];
+      for (int i = 0; i <= periods; i++) {
+        // Calculate this period's date
+        final monthsToAdd = i * monthsPerPeriod;
+        final year =
+            earliestDate.year + (earliestDate.month + monthsToAdd - 1) ~/ 12;
+        final month = (earliestDate.month + monthsToAdd - 1) % 12 + 1;
+        periodBoundaries.add(DateTime(year, month, 1));
+      }
+
+      // Initialize period counts
+      List<int> periodTaskCounts = List.filled(periods, 0);
+
+      // Aggregate tasks by period
       for (var todo in completedTodos) {
         if (todo.completedAt != null) {
-          final year = todo.completedAt!.year.toString();
-          if (lifetimeCompletedTasks.containsKey(year)) {
-            lifetimeCompletedTasks[year] = lifetimeCompletedTasks[year]! + 1;
-          } else {
-            lifetimeCompletedTasks[year] = 1;
+          final completedDate = todo.completedAt!.toLocal();
+
+          // Find which period this task belongs to
+          for (int i = 0; i < periods; i++) {
+            if (completedDate.isAfter(periodBoundaries[i]) &&
+                (i == periods - 1 ||
+                    completedDate.isBefore(periodBoundaries[i + 1]))) {
+              periodTaskCounts[i]++;
+              break;
+            }
           }
         }
       }
 
-      // Convert the map to a list of counts
-      final lifetimeCompletedTasksData = lifetimeCompletedTasks.values.toList();
-
       emit(state.copyWith(
-        lifetimeCompletedTasksData: lifetimeCompletedTasksData,
+        lifetimeCompletedTasksData: periodTaskCounts,
         isLoading: false,
       ));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
     }
-  }
-
-  String _getWeekOfYear(DateTime date) {
-    final firstDayOfYear = DateTime(date.year, 1, 1);
-    final daysSinceFirstDay = date.difference(firstDayOfYear).inDays;
-    return ((daysSinceFirstDay / 7).ceil()).toString();
   }
 }
 
