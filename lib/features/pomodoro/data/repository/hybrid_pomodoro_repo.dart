@@ -133,7 +133,6 @@ class HybridPomodoroRepo implements PomodoroRepo {
   //   }
   // }
 
-  @override
   Future<void> syncTodosIfNeeded() async {
     // if not signed in, do nothing
     if (user == null) return;
@@ -191,7 +190,7 @@ class HybridPomodoroRepo implements PomodoroRepo {
   Future<void> _mergeRemoteIntoLocal(List<Pomodoro> remotePomodoros) async {
     // For each remote todo, upsert into local
     for (final remote in remotePomodoros) {
-      await localRepo.saveSession(remote);
+      await localRepo.mergeRemoteIntoLocal(remote);
       // or read local first to check conflicts
     }
   }

@@ -476,7 +476,7 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
       emit(state.copyWith(weeklySessionsData: weeklyData));
     } catch (e) {
       // Handle errors appropriately
-      print('Error in weeklySessionsData: $e');
+      // print('Error in weeklySessionsData: $e');
     }
   }
 

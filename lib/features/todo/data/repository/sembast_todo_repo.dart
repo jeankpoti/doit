@@ -58,6 +58,23 @@ class SembastTodoRepo {
     await _todoStore.record(newTodo.id).put(db, todoJson);
   }
 
+  Future<void> mergeRemoteIntoLocal(Todo newTodo) async {
+    final record = _todoStore.record(newTodo.id);
+    final exists = await record.exists(db);
+    if (exists) return;
+
+    print('newTodo: ${newTodo.createdAt} ${newTodo.updatedAt}');
+
+    final todoJson = newTodo.toJson();
+
+    todoJson['createdAt'] = newTodo.createdAt.toIso8601String();
+    if (newTodo.updatedAt != null) {
+      todoJson['updatedAt'] = newTodo.updatedAt!.toIso8601String();
+    }
+
+    await _todoStore.record(newTodo.id).put(db, todoJson);
+  }
+
   Future<void> toggleTodoStatus(Todo todo) async {
     final record = _todoStore.record(todo.id);
     final exists = await record.exists(db);

@@ -133,6 +133,8 @@ class AccountCubit extends Cubit<AccountState> {
         isSignOut: true,
         errorMsg: null,
       ));
+
+      resetSignOut();
       // hybridTodoRepo.isSignedIn = false;
     } catch (e) {
       // On error -> isLoading: false, error message

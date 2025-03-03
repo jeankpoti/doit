@@ -1,5 +1,6 @@
 import 'package:do_it/common_widget/loader_widget.dart';
 import 'package:do_it/common_widget/text_widget.dart';
+import 'package:do_it/features/todo/presentation/todo_cubit.dart';
 import 'package:do_it/theme/theme_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'features/account/presentation/account_state.dart';
 import 'features/account/presentation/reset_password_page.dart';
 import 'features/account/presentation/sign_in_page.dart';
 import 'features/todo/presentation/completed_todo_page.dart';
+import 'features/todo/presentation/todo_state.dart';
 
 class SetingsPage extends StatefulWidget {
   const SetingsPage({super.key});
@@ -27,6 +29,8 @@ class _SetingsPageState extends State<SetingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final accountCubit = context.read<AccountCubit>();
+
     return Scaffold(
       appBar: const AppBarWidget(
         title: 'Settings',
@@ -36,11 +40,11 @@ class _SetingsPageState extends State<SetingsPage> {
         child: BlocListener<AccountCubit, AccountState>(
           listener: (context, accountState) {
             if (accountState.errorMsg != null) {
-              ErrorMessageWidget.showError(context, accountState.errorMsg!);
+              ErrorMessageWidget.showError(context, 'Something went wrong!');
             } else if (accountState.isSignOut) {
-              ErrorMessageWidget.showError(context, 'Sign out successful');
+              ErrorMessageWidget.showError(context, 'Sign out successful!');
               // Reset isSignOut state
-              context.read<AccountCubit>().resetSignOut();
+              // context.read<AccountCubit>().resetSignOut();
             }
           },
           child: BlocBuilder<AccountCubit, AccountState>(
@@ -50,6 +54,11 @@ class _SetingsPageState extends State<SetingsPage> {
               if (accountState.isLoading) {
                 return const Center(child: LoaderWidget());
               }
+
+              // if (user != null) {
+              //   print('Syncing todos...');
+              //   context.read<TodoCubit>().syncTodosIfNeeded();
+              // }
 
               return SingleChildScrollView(
                 child: Column(
@@ -107,7 +116,6 @@ class _SetingsPageState extends State<SetingsPage> {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         onTap: () async {
-                          final accountCubit = context.read<AccountCubit>();
                           await accountCubit.signOut();
                         },
                       ),
@@ -226,8 +234,6 @@ class _SetingsPageState extends State<SetingsPage> {
                               );
 
                               if (confirm == true && context.mounted) {
-                                final accountCubit =
-                                    context.read<AccountCubit>();
                                 await accountCubit
                                     .deleteUserWithHisData(context);
                               }

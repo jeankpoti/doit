@@ -38,7 +38,11 @@ class HybridTodoRepo implements TodoRepo {
     if (user != null && isOnline) {
       final remoteTodos = await remoteRepo.getTodos();
 
-      await _mergeRemoteIntoLocal(remoteTodos);
+      // Filter out completed todos
+      final activeRemoteTodos =
+          remoteTodos.where((element) => element.isCompleted == false).toList();
+
+      await _mergeRemoteIntoLocal(activeRemoteTodos);
     }
 
     // Return updated local
@@ -170,7 +174,7 @@ class HybridTodoRepo implements TodoRepo {
   Future<void> _mergeRemoteIntoLocal(List<Todo> remoteTodos) async {
     // For each remote todo, upsert into local
     for (final remote in remoteTodos) {
-      await localRepo.addTodo(remote);
+      await localRepo.mergeRemoteIntoLocal(remote);
       // or read local first to check conflicts
     }
   }

@@ -1,4 +1,6 @@
 import 'package:do_it/common_widget/loader_widget.dart';
+import 'package:do_it/common_widget/text_small_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,6 +30,16 @@ class _TodoPageState extends State<TodoPage> {
     super.initState();
     // Load the todos when this page is first built
     context.read<TodoCubit>().loadTodos();
+  }
+
+  Future<void> _refreshData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await Future.wait([
+        context.read<TodoCubit>().syncTodosIfNeeded(),
+        context.read<TodoCubit>().loadTodos(),
+      ]);
+    }
   }
 
   @override
@@ -60,78 +72,81 @@ class _TodoPageState extends State<TodoPage> {
       ),
       body: SafeArea(
         // Now we build based on TodoState instead of List<Todo>
-        child: BlocBuilder<TodoCubit, TodoState>(
-          builder: (context, state) {
-            // 1) Loading
-            if (state.isLoading) {
-              return const Center(
-                child: LoaderWidget(),
-              );
-            }
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: BlocBuilder<TodoCubit, TodoState>(
+            builder: (context, state) {
+              // 1) Loading
+              if (state.isLoading) {
+                return const Center(
+                  child: LoaderWidget(),
+                );
+              }
 
-            // 2) Error
-            if (state.errorMsg != null) {
-              return Center(
-                child: TextWidget(text: 'Error: ${state.errorMsg}'),
-              );
-            }
+              // 2) Error
+              if (state.errorMsg != null) {
+                return const Center(
+                  child: TextSmallWidget(text: 'Something went wrong!'),
+                );
+              }
 
-            // 3) No todos found
-            if (state.todos.isEmpty) {
-              return const Center(
-                child: TextWidget(
-                  text: 'No todo found!',
-                ),
-              );
-            }
-
-            // 4) Show the todos list
-            final todos = state.todos;
-
-            return ListView.builder(
-              itemCount: todos.length,
-              itemBuilder: (context, index) {
-                final todo = todos[index];
-                // Optionally hide completed
-                // if (todo.isCompleted) {
-                //   return const SizedBox.shrink();
-                // }
-                if (todo.pendingDelete) {
-                  return const SizedBox.shrink();
-                }
-
-                return GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TodoDetailsPage(todo: todo),
-                    ),
-                  ),
-                  onLongPress: () {
-                    // Enter multi-select mode
-                    setState(() {
-                      isSelectionMode = true;
-                    });
-                  },
-                  child: ListTileWidget(
-                    todoList: todo,
-                    isTrailingVisible: true,
-                    isSelectionMode: isSelectionMode,
-                    isSelected: selectedTodos.contains(todo),
-                    onSelected: (bool? selected) {
-                      setState(() {
-                        if (selected == true) {
-                          selectedTodos.add(todo);
-                        } else {
-                          selectedTodos.remove(todo);
-                        }
-                      });
-                    },
+              // 3) No todos found
+              if (state.todos.isEmpty) {
+                return const Center(
+                  child: TextSmallWidget(
+                    text: 'No todo found!',
                   ),
                 );
-              },
-            );
-          },
+              }
+
+              // 4) Show the todos list
+              final todos = state.todos;
+
+              return ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+                  // Optionally hide completed
+                  // if (todo.isCompleted) {
+                  //   return const SizedBox.shrink();
+                  // }
+                  if (todo.pendingDelete) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TodoDetailsPage(todo: todo),
+                      ),
+                    ),
+                    onLongPress: () {
+                      // Enter multi-select mode
+                      setState(() {
+                        isSelectionMode = true;
+                      });
+                    },
+                    child: ListTileWidget(
+                      todoList: todo,
+                      isTrailingVisible: true,
+                      isSelectionMode: isSelectionMode,
+                      isSelected: selectedTodos.contains(todo),
+                      onSelected: (bool? selected) {
+                        setState(() {
+                          if (selected == true) {
+                            selectedTodos.add(todo);
+                          } else {
+                            selectedTodos.remove(todo);
+                          }
+                        });
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
 

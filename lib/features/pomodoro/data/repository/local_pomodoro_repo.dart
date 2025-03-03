@@ -29,6 +29,17 @@ class LocalPomodoroRepo {
     await _pomodoroStore.record(pomodoro.id).put(db, todoJson);
   }
 
+  Future<void> mergeRemoteIntoLocal(Pomodoro pomodoro) async {
+    final record = _pomodoroStore.record(pomodoro.id);
+    final exists = await record.exists(db);
+    if (exists) return;
+
+    final todoJson = pomodoro.toJson();
+    todoJson['createdAt'] = pomodoro.createdAt;
+    todoJson['updatedAt'] = pomodoro.updatedAt;
+    await _pomodoroStore.record(pomodoro.id).put(db, todoJson);
+  }
+
   Future<List<Pomodoro>> getSessions() async {
     final records = await _pomodoroStore.find(
       db,

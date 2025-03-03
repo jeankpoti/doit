@@ -100,6 +100,16 @@ class TodoCubit extends Cubit<TodoState> {
     }
   }
 
+  Future<void> syncTodosIfNeeded() async {
+    emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      await todoRepo.syncTodosIfNeeded();
+      emit(state.copyWith(isLoading: false));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
   Future<void> dailyCompletedTasksData() async {
     try {
       final completedTodos = await todoRepo.getCompletedTodos();
