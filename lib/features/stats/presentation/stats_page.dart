@@ -42,15 +42,15 @@ class _StatsPageState extends State<StatsPage> {
     ]);
   }
 
-  final List<int> dailyTasksData = [4, 6, 3, 5, 7, 2, 8];
-  final List<int> weeklyTasksData = [3, 5, 2, 4, 6, 1, 7];
-  final List<int> monthlyTasksData = [80, 85];
-  final List<int> lifetimeTasksData = [0, 350];
+  // final List<int> dailyTasksData = [4, 6, 3, 5, 7, 2, 8];
+  // final List<int> weeklyTasksData = [3, 5, 2, 4, 6, 1, 7];
+  // final List<int> monthlyTasksData = [80, 85];
+  // final List<int> lifetimeTasksData = [0, 350];
 
-  final List<int> dailySessionsData = [1, 2, 3, 4, 5, 6, 7];
-  final List<int> weeklySessionsData = [2, 3, 4, 5, 6, 7, 8];
-  final List<int> monthlySessionsData = [40, 45, 50, 55, 60, 65, 70];
-  final List<int> lifetimeSessionsData = [2, 3, 4, 5, 6, 7, 8];
+  // final List<int> dailySessionsData = [1, 2, 3, 4, 5, 6, 7];
+  // final List<int> weeklySessionsData = [2, 3, 4, 5, 6, 7, 8];
+  // final List<int> monthlySessionsData = [40, 45, 50, 55, 60, 65, 70];
+  // final List<int> lifetimeSessionsData = [2, 3, 4, 5, 6, 7, 8];
 
   Future<void> _refreshData() async {
     // Refresh data based on the selected timeframe
