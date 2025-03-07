@@ -60,5 +60,11 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>662658703999-f2m30h0871bsaoqn3d9ngmigkd3502qv.apps.googleusercontent.com</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Access most functions for calendar viewing and editing.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Access contacts for event attendee editing.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+    <string>Access most functions for calendar viewing and editing.</string>
 </dict>
 </plist>

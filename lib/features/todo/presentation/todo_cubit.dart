@@ -344,6 +344,16 @@ class TodoCubit extends Cubit<TodoState> {
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
     }
   }
+
+  Future<void> syncTodosToCalendar(context, List<Todo> todos) async {
+    // emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      await todoRepo.syncTodosToCalendar(context, todos);
+      // emit(state.copyWith(todos: todos, isLoading: false));
+    } catch (e) {
+      // emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
 }
 
 // /*

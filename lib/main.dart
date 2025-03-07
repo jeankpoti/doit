@@ -120,7 +120,11 @@ void main() async {
     switch (status) {
       case InternetStatus.connected:
         // The internet is now connected
-        if (user != null) hybridTodoRepo.syncTodosIfNeeded();
+        if (user != null) {
+          hybridTodoRepo.syncTodosIfNeeded();
+          hybridPomodoroRepo.syncPomodorosIfNeeded();
+        }
+        ;
         break;
       case InternetStatus.disconnected:
         // The internet is now disconnected

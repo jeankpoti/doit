@@ -1,5 +1,7 @@
 import 'package:do_it/common_widget/loader_widget.dart';
 import 'package:do_it/common_widget/text_small_widget.dart';
+import 'package:do_it/features/pomodoro/domain/models/pomodoro.dart';
+import 'package:do_it/features/pomodoro/presentation/pomodoro_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,8 +38,13 @@ class _TodoPageState extends State<TodoPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await Future.wait([
+        // Sync todos first
         context.read<TodoCubit>().syncTodosIfNeeded(),
         context.read<TodoCubit>().loadTodos(),
+
+        // Sync Pomodoro data as well
+        context.read<PomodoroCubit>().syncPomodoroIfNeeded(),
+        context.read<PomodoroCubit>().getSessions(),
       ]);
     }
   }

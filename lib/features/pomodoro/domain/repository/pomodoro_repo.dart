@@ -17,6 +17,8 @@ abstract class PomodoroRepo {
   Future<List<Pomodoro>> getSessions();
 
   Future<void> saveSession(Pomodoro pomodoro);
+
+  Future<void> syncPomodorosIfNeeded();
 }
 
 /*

@@ -1,4 +1,6 @@
+import 'package:device_calendar/device_calendar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import '../../domain/models/todo.dart';
 import '../../domain/repository/todo_repo.dart';
@@ -15,6 +17,7 @@ class HybridTodoRepo implements TodoRepo {
   });
 
   final user = FirebaseAuth.instance.currentUser;
+  final DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
 
   // bool isSignedIn = false; // Updated when user logs in/out
   bool isOnline = false; // Could be updated by a connectivity listener
@@ -225,6 +228,209 @@ class HybridTodoRepo implements TodoRepo {
           isCompleted: todo.isCompleted,
         ),
       );
+    }
+  }
+
+  @override
+  Future<void> syncTodosToCalendar(context, List<Todo> todos) async {
+    // Request permissions
+    var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
+    if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
+      permissionsGranted = await _deviceCalendarPlugin.requestPermissions();
+      if (!permissionsGranted.isSuccess || !permissionsGranted.data!) {
+        // Permissions not granted
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Calendar permissions are required to sync todos.'),
+          ),
+        );
+        return;
+      }
+    }
+
+    // Retrieve calendars
+    final calendarsResult = await _deviceCalendarPlugin.retrieveCalendars();
+    if (!calendarsResult.isSuccess || calendarsResult.data == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not retrieve calendars.'),
+        ),
+      );
+      return;
+    }
+
+    // Filter writable calendars
+    final writableCalendars = calendarsResult.data!
+        .where((calendar) => calendar.isReadOnly == false)
+        .toList();
+
+    if (writableCalendars.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No writable calendars available.'),
+        ),
+      );
+      return;
+    }
+
+    // Show calendar selection dialog
+    final selectedCalendar = await showDialog<Calendar>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Calendar'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: writableCalendars.map((calendar) {
+                return ListTile(
+                  title: Text(calendar.name ?? 'Unnamed Calendar'),
+                  onTap: () {
+                    Navigator.pop(context, calendar);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selectedCalendar == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No calendar selected.'),
+        ),
+      );
+      return;
+    }
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Syncing todos..."),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // Retrieve events from the last 3 months only
+      final DateTime startDate =
+          DateTime.now().subtract(const Duration(days: 90));
+      final DateTime endDate =
+          DateTime.now().add(const Duration(days: 7)); // Include a week ahead
+
+      final existingEventsResult = await _deviceCalendarPlugin.retrieveEvents(
+        selectedCalendar.id,
+        RetrieveEventsParams(
+          startDate: startDate,
+          endDate: endDate,
+        ),
+      );
+
+      if (!existingEventsResult.isSuccess) {
+        throw Exception(
+            "Failed to retrieve existing events: ${existingEventsResult.errors.join(', ')}");
+      }
+
+      final existingEvents = existingEventsResult.data ?? [];
+      print(
+          "Retrieved ${existingEvents.length} existing events from the last 3 months");
+
+      // Create a map of existing events by title for faster lookup
+      final Map<String, Event> existingEventsByTitle = {};
+      for (final event in existingEvents) {
+        if (event.title != null) {
+          existingEventsByTitle[event.title!] = event;
+        }
+      }
+
+      int addedCount = 0;
+      int updatedCount = 0;
+
+      // Process each todo
+      for (var todo in todos) {
+        // For all-day events, use the todo creation date or current date
+        final DateTime eventDate = todo.createdAt ?? DateTime.now();
+        // Normalize to midnight for all-day events
+        final DateTime normalizedDate =
+            DateTime(eventDate.year, eventDate.month, eventDate.day);
+
+        // Check if a todo with the same title already exists
+        final existingEvent = existingEventsByTitle[todo.title];
+
+        if (existingEvent != null) {
+          // Update existing event
+          existingEvent.description = todo.description;
+          existingEvent.allDay = true;
+          existingEvent.start = normalizedDate;
+          existingEvent.end = normalizedDate;
+
+          try {
+            // Update the event
+            final updateResult =
+                await _deviceCalendarPlugin.createOrUpdateEvent(existingEvent);
+            if (updateResult!.isSuccess) {
+              updatedCount++;
+            }
+          } catch (e) {
+            print("Exception updating event: $e");
+          }
+        } else {
+          // Create new event
+          final event = Event(
+            selectedCalendar.id,
+            title: todo.title,
+            description: todo.description,
+            allDay: true,
+            start: normalizedDate,
+            end: normalizedDate,
+          );
+
+          try {
+            // Create the event
+            final createResult =
+                await _deviceCalendarPlugin.createOrUpdateEvent(event);
+            if (createResult!.isSuccess) {
+              addedCount++;
+            }
+          } catch (e) {
+            print("Exception creating event: $e");
+          }
+        }
+      }
+
+      // Close loading dialog
+      Navigator.of(context, rootNavigator: true).pop();
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Todos synced: $addedCount added, $updatedCount updated'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      // Close loading dialog
+      Navigator.of(context, rootNavigator: true).pop();
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error syncing todos: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print('Error syncing todos: $e');
     }
   }
 }

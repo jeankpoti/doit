@@ -16,6 +16,7 @@ abstract class TodoRepo {
   Future<List<Todo>> getTodos();
   Future<List<Todo>> getCompletedTodos();
   Future<void> syncTodosIfNeeded();
+  Future<void> syncTodosToCalendar(context, List<Todo> todos);
 }
 
 /*

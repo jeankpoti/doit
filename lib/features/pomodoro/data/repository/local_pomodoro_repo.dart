@@ -35,8 +35,10 @@ class LocalPomodoroRepo {
     if (exists) return;
 
     final todoJson = pomodoro.toJson();
-    todoJson['createdAt'] = pomodoro.createdAt;
-    todoJson['updatedAt'] = pomodoro.updatedAt;
+    todoJson['createdAt'] = pomodoro.createdAt.toIso8601String();
+    if (pomodoro.updatedAt != null) {
+      todoJson['updatedAt'] = pomodoro.updatedAt!.toIso8601String();
+    }
     await _pomodoroStore.record(pomodoro.id).put(db, todoJson);
   }
 

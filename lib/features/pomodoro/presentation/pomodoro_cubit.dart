@@ -374,6 +374,15 @@ class PomodoroCubit extends Cubit<PomodoroConfigState> {
     }
   }
 
+  Future<void> syncPomodoroIfNeeded() async {
+    // emit(state.copyWith(isLoading: true, errorMsg: null));
+    try {
+      await pomodoroRepo.syncPomodorosIfNeeded();
+    } catch (e) {
+      // emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+    }
+  }
+
   Future<void> saveSession() async {
     // emit(state.copyWith(isLoading: true, errorMsg: null));
     try {

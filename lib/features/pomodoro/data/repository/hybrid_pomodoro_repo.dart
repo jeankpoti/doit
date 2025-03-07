@@ -133,7 +133,8 @@ class HybridPomodoroRepo implements PomodoroRepo {
   //   }
   // }
 
-  Future<void> syncTodosIfNeeded() async {
+  @override
+  Future<void> syncPomodorosIfNeeded() async {
     // if not signed in, do nothing
     if (user == null) return;
 
