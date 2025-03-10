@@ -57,23 +57,58 @@ class TodoCubit extends Cubit<TodoState> {
     }
   }
 
+  // Updated deletion process with animation support
   Future<void> deleteTodo(Todo todo) async {
-    emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
-      await todoRepo.deleteTodo(todo);
-      final updatedTodos = await todoRepo.getTodos();
-      emit(state.copyWith(todos: updatedTodos, isLoading: false));
+      // First mark the todo as pending delete in the UI
+      // This will keep it in the list during animation
+      final currentTodos = List<Todo>.from(state.todos);
+      final index = currentTodos.indexWhere((t) => t.id == todo.id);
+
+      if (index != -1) {
+        // Mark as pending delete in the UI
+        currentTodos[index] = currentTodos[index].markPendingDelete();
+        emit(state.copyWith(todos: currentTodos));
+
+        // Small delay to allow animation to begin
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        // Actually delete the todo from storage
+        await todoRepo.deleteTodo(todo);
+
+        // Update the list after animation would complete
+        await Future.delayed(const Duration(milliseconds: 500));
+        final updatedTodos = await todoRepo.getTodos();
+        emit(state.copyWith(todos: updatedTodos));
+      }
     } catch (e) {
-      emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+      emit(state.copyWith(errorMsg: e.toString()));
     }
   }
 
+  // Updated toggle method with animation support
   Future<void> toggleTodoStatus(Todo todo) async {
-    emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
       final updatedTodo = todo.toggleCompletion();
+
+      // If completing a task, update UI immediately to begin animation
+      if (updatedTodo.isCompleted) {
+        final currentTodos = List<Todo>.from(state.todos);
+        final index = currentTodos.indexWhere((t) => t.id == todo.id);
+
+        if (index != -1) {
+          currentTodos[index] = updatedTodo;
+          emit(state.copyWith(todos: currentTodos));
+        }
+      }
+
+      // Update the repository
       await todoRepo.toggleTodoStatus(updatedTodo);
 
+      // Allow time for animation
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Final update
       final updatedTodos = await todoRepo.getTodos();
       emit(state.copyWith(todos: updatedTodos, isLoading: false));
     } catch (e) {
@@ -82,11 +117,28 @@ class TodoCubit extends Cubit<TodoState> {
   }
 
   Future<void> toggleComletedTodoStatus(Todo todo) async {
-    emit(state.copyWith(isLoading: true, errorMsg: null));
     try {
       final updatedTodo = todo.toggleCompletion();
+
+      // Handle animation for completed todos
+      if (updatedTodo.isCompleted) {
+        // First update UI to reflect the change immediately
+        final currentTodos = List<Todo>.from(state.todos);
+        final index = currentTodos.indexWhere((t) => t.id == todo.id);
+
+        if (index != -1) {
+          currentTodos[index] = updatedTodo;
+          emit(state.copyWith(todos: currentTodos));
+        }
+      }
+
+      // Update repository
       await todoRepo.toggleTodoStatus(updatedTodo);
 
+      // Wait for animation
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Final update
       final completedTodos = await todoRepo.getCompletedTodos();
       final unCompletedTodos = await todoRepo.getTodos();
 
@@ -99,6 +151,98 @@ class TodoCubit extends Cubit<TodoState> {
       emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
     }
   }
+
+  // Future<void> loadTodos() async {
+  //   emit(state.copyWith(isLoading: true, errorMsg: null));
+  //   try {
+  //     final todos = await todoRepo.getTodos();
+  //     emit(state.copyWith(todos: todos, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+  //   }
+  // }
+
+  // Future<void> loadCompletedTodos() async {
+  //   emit(state.copyWith(isLoading: true, errorMsg: null));
+  //   try {
+  //     final completedTodos = await todoRepo.getCompletedTodos();
+
+  //     emit(state.copyWith(completedTodos: completedTodos, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+  //   }
+  // }
+
+  // Future<void> addTodo(String title, String description) async {
+  //   emit(state.copyWith(isLoading: true, errorMsg: null));
+  //   try {
+  //     final newTodo = Todo(
+  //       id: DateTime.now().millisecondsSinceEpoch,
+  //       title: title,
+  //       description: description,
+  //     );
+
+  //     await todoRepo.addTodo(newTodo);
+  //     final updatedTodos = await todoRepo.getTodos();
+  //     emit(state.copyWith(todos: updatedTodos, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+  //   }
+  // }
+
+  // Future<void> updateTodo(Todo todo) async {
+  //   emit(state.copyWith(isLoading: true, errorMsg: null));
+  //   try {
+  //     await todoRepo.updateTodo(todo);
+  //     final updatedTodos = await todoRepo.getTodos();
+  //     emit(state.copyWith(todos: updatedTodos, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+  //   }
+  // }
+
+  // Future<void> deleteTodo(Todo todo) async {
+  //   emit(state.copyWith(isLoading: true, errorMsg: null));
+  //   try {
+  //     await todoRepo.deleteTodo(todo);
+  //     final updatedTodos = await todoRepo.getTodos();
+  //     emit(state.copyWith(todos: updatedTodos, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+  //   }
+  // }
+
+  // Future<void> toggleTodoStatus(Todo todo) async {
+  //   emit(state.copyWith(isLoading: true, errorMsg: null));
+  //   try {
+  //     final updatedTodo = todo.toggleCompletion();
+  //     await todoRepo.toggleTodoStatus(updatedTodo);
+
+  //     final updatedTodos = await todoRepo.getTodos();
+  //     emit(state.copyWith(todos: updatedTodos, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+  //   }
+  // }
+
+  // Future<void> toggleComletedTodoStatus(Todo todo) async {
+  //   emit(state.copyWith(isLoading: true, errorMsg: null));
+  //   try {
+  //     final updatedTodo = todo.toggleCompletion();
+  //     await todoRepo.toggleTodoStatus(updatedTodo);
+
+  //     final completedTodos = await todoRepo.getCompletedTodos();
+  //     final unCompletedTodos = await todoRepo.getTodos();
+
+  //     emit(state.copyWith(
+  //       completedTodos: completedTodos,
+  //       todos: unCompletedTodos,
+  //       isLoading: false,
+  //     ));
+  //   } catch (e) {
+  //     emit(state.copyWith(isLoading: false, errorMsg: e.toString()));
+  //   }
+  // }
 
   Future<void> syncTodosIfNeeded() async {
     emit(state.copyWith(isLoading: true, errorMsg: null));

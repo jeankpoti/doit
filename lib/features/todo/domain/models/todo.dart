@@ -60,6 +60,19 @@ class Todo extends Equatable {
     };
   }
 
+  // Mark as pending delete (for animation)
+  Todo markPendingDelete() {
+    return Todo(
+      id: id,
+      title: title,
+      description: description,
+      createdAt: createdAt,
+      completedAt: completedAt,
+      isCompleted: isCompleted,
+      pendingDelete: true,
+    );
+  }
+
   // Helper copyWith for immutability
   Todo copyWith({
     int? id,
