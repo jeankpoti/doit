@@ -1,12 +1,10 @@
 import 'package:do_it/common_widget/loader_widget.dart';
 import 'package:do_it/common_widget/text_small_widget.dart';
-import 'package:do_it/features/pomodoro/domain/models/pomodoro.dart';
 import 'package:do_it/features/pomodoro/presentation/pomodoro_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../common_widget/text_widget.dart';
 import '../domain/models/todo.dart';
 import '../domain/repository/todo_repo.dart';
 import 'add_todo_page.dart';

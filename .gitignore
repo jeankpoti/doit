@@ -43,3 +43,28 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Certificate files
+CertificateSigningRequest*
+*.mobileprovision
+*.keystore
+*.p12
+
+# Environment files
+.env*
+
+# Generated Flutter files
+**/generated_plugin_registrant.cc
+**/generated_plugin_registrant.h
+**/generated_plugins.cmake
+
+# Podfile.lock files
+**/Podfile.lock
+
+# Build artifacts
+/build/
+**/build/
+
+# Gradle lock files
+**/*.lock
+!pubspec.lock

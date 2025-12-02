@@ -342,8 +342,6 @@ class HybridTodoRepo implements TodoRepo {
       }
 
       final existingEvents = existingEventsResult.data ?? [];
-      print(
-          "Retrieved ${existingEvents.length} existing events from the last 3 months");
 
       // Create a map of existing events by title for faster lookup
       final Map<String, Event> existingEventsByTitle = {};
@@ -371,8 +369,12 @@ class HybridTodoRepo implements TodoRepo {
           // Update existing event
           existingEvent.description = todo.description;
           existingEvent.allDay = true;
-          existingEvent.start = normalizedDate;
-          existingEvent.end = normalizedDate;
+          existingEvent.start =
+              // normalizedDate;
+              TZDateTime.from(normalizedDate, local);
+          existingEvent.end =
+              // normalizedDate;
+              TZDateTime.from(normalizedDate, local);
 
           try {
             // Update the event
@@ -382,7 +384,7 @@ class HybridTodoRepo implements TodoRepo {
               updatedCount++;
             }
           } catch (e) {
-            print("Exception updating event: $e");
+            // print("Exception updating event: $e");
           }
         } else {
           // Create new event
@@ -391,8 +393,12 @@ class HybridTodoRepo implements TodoRepo {
             title: todo.title,
             description: todo.description,
             allDay: true,
-            start: normalizedDate,
-            end: normalizedDate,
+            start:
+                // normalizedDate,
+                TZDateTime.from(normalizedDate, local),
+            end:
+                // normalizedDate,
+                TZDateTime.from(normalizedDate, local),
           );
 
           try {
@@ -402,9 +408,7 @@ class HybridTodoRepo implements TodoRepo {
             if (createResult!.isSuccess) {
               addedCount++;
             }
-          } catch (e) {
-            print("Exception creating event: $e");
-          }
+          } catch (e) {}
         }
       }
 
@@ -430,7 +434,6 @@ class HybridTodoRepo implements TodoRepo {
           backgroundColor: Colors.red,
         ),
       );
-      print('Error syncing todos: $e');
     }
   }
 }
